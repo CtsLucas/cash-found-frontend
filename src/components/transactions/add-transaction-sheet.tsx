@@ -50,6 +50,7 @@ const transactionSchema = z.object({
     invoiceMonth: z.string().optional(),
     installments: z.coerce.number().min(1).optional(),
     currentInstallment: z.coerce.number().optional(),
+    groupId: z.string().optional(),
     userId: z.string()
 });
 
@@ -156,7 +157,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             form.reset(defaultValues);
         }
     }
-  }, [user, isOpen, editingTransaction, currentMonth, form]);
+  }, [user, isOpen, editingTransaction, currentMonth]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
@@ -189,6 +190,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         const installmentAmount = calculatedAmount / installmentCount;
         const startingInvoiceDate = data.invoiceMonth ? new Date(data.invoiceMonth) : new Date();
         const originalTransactionDate = new Date(data.date);
+        const groupId = doc(collection(firestore, 'some_path')).id; // Temporary ref to get a new ID
 
         for (let i = 0; i < installmentCount; i++) {
             const newTransactionRef = doc(transactionsCollection);
@@ -206,6 +208,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 invoiceMonth: format(invoiceDate, 'MMMM yyyy'),
                 installments: installmentCount,
                 currentInstallment: i + 1,
+                groupId,
             };
             batch.set(newTransactionRef, installmentTransaction);
         }

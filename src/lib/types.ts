@@ -14,6 +14,7 @@ export type Transaction = {
   invoiceMonth?: string;
   installments?: number;
   currentInstallment?: number;
+  groupId?: string;
 };
 
 export type Category = {

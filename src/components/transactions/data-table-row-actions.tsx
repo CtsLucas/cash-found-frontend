@@ -18,7 +18,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Transaction } from "@/lib/types"
 import { useFirestore, useUser } from "@/firebase"
-import { doc } from "firebase/firestore"
+import { collection, deleteDoc, doc, getDocs, query, where, writeBatch } from "firebase/firestore"
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
@@ -38,13 +38,29 @@ export function DataTableRowActions<TData extends Transaction>({
   const { user } = useUser();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const handleDelete = () => {
-    if (user) {
-      const transactionRef = doc(firestore, `users/${user.uid}/transactions/${transaction.id}`);
-      deleteDocumentNonBlocking(transactionRef);
-      setIsDeleteDialogOpen(false);
+  const handleDelete = async () => {
+    if (!user || !firestore) return;
+
+    if (transaction.groupId) {
+        const batch = writeBatch(firestore);
+        const transactionsQuery = query(
+            collection(firestore, `users/${user.uid}/transactions`),
+            where('groupId', '==', transaction.groupId)
+        );
+        const querySnapshot = await getDocs(transactionsQuery);
+        querySnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+    } else {
+        const transactionRef = doc(firestore, `users/${user.uid}/transactions/${transaction.id}`);
+        deleteDocumentNonBlocking(transactionRef);
     }
+    
+    setIsDeleteDialogOpen(false);
   }
+
+  const isInstallment = transaction.installments && transaction.installments > 1;
 
   return (
     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -70,7 +86,10 @@ export function DataTableRowActions<TData extends Transaction>({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the transaction.
+            {isInstallment 
+              ? "This action cannot be undone. This will permanently delete this transaction and all its related installments."
+              : "This action cannot be undone. This will permanently delete the transaction."
+            }
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
