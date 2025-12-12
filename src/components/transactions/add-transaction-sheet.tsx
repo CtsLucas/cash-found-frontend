@@ -115,6 +115,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       category: "",
       date: new Date().toISOString().split("T")[0],
       tags: [],
+      cardId: "",
       invoiceMonth: currentMonth,
       installments: 1,
       userId: user?.uid
@@ -261,7 +262,9 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                     className="grid grid-cols-2 gap-2"
                                 >
                                     <FormItem>
-                                        <RadioGroupItem value="expense" id="r1" className="sr-only" />
+                                        <FormControl>
+                                            <RadioGroupItem value="expense" id="r1" className="sr-only" />
+                                        </FormControl>
                                         <FormLabel htmlFor="r1">
                                             <div className={cn(
                                                 "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
@@ -272,7 +275,9 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                         </FormLabel>
                                     </FormItem>
                                     <FormItem>
-                                        <RadioGroupItem value="income" id="r2" className="sr-only" />
+                                        <FormControl>
+                                            <RadioGroupItem value="income" id="r2" className="sr-only" />
+                                        </FormControl>
                                         <FormLabel htmlFor="r2">
                                             <div className={cn(
                                                 "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
@@ -519,3 +524,5 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   );
 }
 
+
+    
