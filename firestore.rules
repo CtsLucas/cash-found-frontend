@@ -144,7 +144,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's transactions.
        */
       match /transactions/{transactionId} {
-        allow list, get: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -157,7 +157,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's categories.
        */
       match /categories/{categoryId} {
-        allow list, get: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -170,7 +170,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's tags.
        */
       match /tags/{tagId} {
-        allow list, get: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -183,7 +183,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's cards.
        */
       match /cards/{cardId} {
-        allow list, get: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -195,7 +195,7 @@ service cloud.firestore {
          * @deny A user cannot query invoices for another user's card.
          */
         match /invoices/{invoiceId} {
-          allow list, get: if isOwner(userId);
+          allow read: if isOwner(userId);
           allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
           allow update: if isExistingOwner(userId) && cardIdIsImmutable();
           allow delete: if isExistingOwner(userId);
@@ -209,7 +209,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's installments.
        */
       match /transactions/{transactionId}/installments/{installmentId} {
-        allow list, get: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
         allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
         allow delete: if isExistingOwner(userId);
