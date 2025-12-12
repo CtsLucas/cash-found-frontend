@@ -262,30 +262,28 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                     className="grid grid-cols-2 gap-2"
                                 >
                                     <FormItem>
-                                        <FormControl>
-                                            <RadioGroupItem value="expense" id="r1" className="sr-only" />
-                                        </FormControl>
-                                        <FormLabel htmlFor="r1">
-                                            <div className={cn(
+                                        <RadioGroupItem value="expense" id="r1" className="sr-only" />
+                                        <div
+                                            onClick={() => field.onChange('expense')}
+                                            className={cn(
                                                 "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                                                 field.value === 'expense' && "bg-red-500 text-white border-red-500"
-                                            )}>
-                                                Expense
-                                            </div>
-                                        </FormLabel>
+                                            )}
+                                        >
+                                            Expense
+                                        </div>
                                     </FormItem>
                                     <FormItem>
-                                        <FormControl>
-                                            <RadioGroupItem value="income" id="r2" className="sr-only" />
-                                        </FormControl>
-                                        <FormLabel htmlFor="r2">
-                                            <div className={cn(
+                                        <RadioGroupItem value="income" id="r2" className="sr-only" />
+                                        <div
+                                            onClick={() => field.onChange('income')}
+                                            className={cn(
                                                 "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                                                 field.value === 'income' && "bg-green-500 text-white border-green-500"
-                                            )}>
-                                                Income
-                                            </div>
-                                        </FormLabel>
+                                            )}
+                                        >
+                                            Income
+                                        </div>
                                     </FormItem>
                                 </RadioGroup>
                             </FormControl>
@@ -524,5 +522,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   );
 }
 
-
-    
