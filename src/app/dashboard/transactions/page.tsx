@@ -26,6 +26,8 @@ import { Transaction } from "@/lib/types"
     const firestore = useFirestore();
     const { user } = useUser();
     const [filter, setFilter] = useState('all');
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
     const transactionsQuery = useMemoFirebase(() => {
         if (!user) return null;
@@ -43,6 +45,18 @@ import { Transaction } from "@/lib/types"
         if (!transactions) return [];
         return transactions;
     }, [transactions]);
+    
+    const handleEdit = (transaction: Transaction) => {
+        setEditingTransaction(transaction);
+        setIsSheetOpen(true);
+    }
+
+    const handleSheetOpenChange = (isOpen: boolean) => {
+        setIsSheetOpen(isOpen);
+        if (!isOpen) {
+            setEditingTransaction(null);
+        }
+    }
     
     return (
         <>
@@ -63,26 +77,25 @@ import { Transaction } from "@/lib/types"
                       Export
                     </span>
                   </Button>
-                  <AddTransactionSheet />
+                  <AddTransactionSheet isOpen={isSheetOpen} onOpenChange={handleSheetOpenChange} editingTransaction={editingTransaction} />
                 </div>
               </div>
               <TabsContent value="all">
                 <ClientOnly>
-                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns} data={filteredTransactions} />}
+                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns(handleEdit)} data={filteredTransactions} />}
                 </ClientOnly>
               </TabsContent>
               <TabsContent value="income">
                 <ClientOnly>
-                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns} data={filteredTransactions} />}
+                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns(handleEdit)} data={filteredTransactions} />}
                 </ClientOnly>
               </TabsContent>
               <TabsContent value="expense">
                 <ClientOnly>
-                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns} data={filteredTransactions} />}
+                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns(handleEdit)} data={filteredTransactions} />}
                 </ClientOnly>
               </TabsContent>
             </Tabs>
         </>
     )
   }
-  

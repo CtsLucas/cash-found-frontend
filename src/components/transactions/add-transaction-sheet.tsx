@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PlusCircle, X } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -28,8 +27,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useFirestore, useUser, useCollection, useMemoFirebase } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { collection } from "firebase/firestore";
+import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, doc } from "firebase/firestore";
 import { Category, Transaction, Tag, Card } from "@/lib/types";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -63,10 +62,21 @@ const getInvoiceMonths = () => {
     return months;
 }
 
-export function AddTransactionSheet() {
+interface AddTransactionSheetProps {
+    children?: React.ReactNode;
+    isOpen?: boolean;
+    onOpenChange?: (isOpen: boolean) => void;
+    editingTransaction?: Transaction | null;
+}
+
+export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: setControlledIsOpen, editingTransaction, children }: AddTransactionSheetProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const [isOpen, setIsOpen] = React.useState(false);
+
+  const [isInternalOpen, setInternalOpen] = React.useState(false);
+
+  const isOpen = controlledIsOpen ?? isInternalOpen;
+  const setIsOpen = setControlledIsOpen ?? setInternalOpen;
 
   const categoriesQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -108,7 +118,7 @@ export function AddTransactionSheet() {
 
   React.useEffect(() => {
     if (user) {
-        form.reset({
+        const defaultValues = {
             type: "expense",
             amount: 0,
             deduction: 0,
@@ -116,41 +126,65 @@ export function AddTransactionSheet() {
             category: "",
             date: new Date().toISOString().split("T")[0],
             tags: [],
+            cardId: "",
+            invoiceMonth: "",
             userId: user.uid
-        });
+        };
+
+        if (editingTransaction) {
+            form.reset({
+              ...editingTransaction,
+              tags: editingTransaction.tags || [],
+            });
+        } else {
+            form.reset(defaultValues);
+        }
     }
-  }, [user, form, isOpen]);
+  }, [user, form, isOpen, editingTransaction]);
 
   const onSubmit = (data: TransactionFormValues) => {
     if (!user) return;
-    const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
-    const dataToSave = { ...data };
+    
+    const dataToSave: Partial<TransactionFormValues> = { ...data };
     if(data.type === 'income') {
       delete dataToSave.cardId;
       delete dataToSave.invoiceMonth;
+      delete dataToSave.deduction;
     }
-    addDocumentNonBlocking(transactionsCollection, dataToSave);
+
+    if (editingTransaction?.id) {
+        const transactionRef = doc(firestore, `users/${user.uid}/transactions/${editingTransaction.id}`);
+        setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
+    } else {
+        const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
+        addDocumentNonBlocking(transactionsCollection, dataToSave);
+    }
+    
     setIsOpen(false);
-    form.reset();
   };
 
   const invoiceMonths = getInvoiceMonths();
+  const isEditing = !!editingTransaction;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button size="sm" className="h-8 gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Transaction
-          </span>
-        </Button>
-      </SheetTrigger>
+        {children ? (
+            <SheetTrigger asChild>{children}</SheetTrigger>
+        ) : (
+            <SheetTrigger asChild>
+                <Button size="sm" className="h-8 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Add Transaction
+                </span>
+                </Button>
+            </SheetTrigger>
+        )}
       <SheetContent className="sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Add a new transaction</SheetTitle>
+          <SheetTitle>{isEditing ? 'Edit transaction' : 'Add a new transaction'}</SheetTitle>
           <SheetDescription>
-            Fill in the details below to add a new financial record.
+            {isEditing ? 'Update the details of your financial record.' : 'Fill in the details below to add a new financial record.'}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -251,7 +285,7 @@ export function AddTransactionSheet() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Category</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a category" />
@@ -279,7 +313,7 @@ export function AddTransactionSheet() {
                                             variant="outline"
                                             role="combobox"
                                             className={cn(
-                                                "w-full justify-between",
+                                                "w-full justify-between h-auto",
                                                 !field.value?.length && "text-muted-foreground"
                                             )}
                                         >
@@ -346,13 +380,14 @@ export function AddTransactionSheet() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Card</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a card" />
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
+                                            <SelectItem value="">None</SelectItem>
                                             {cards?.map(card => <SelectItem key={card.id} value={card.id}>{card.cardName} - {card.last4}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -366,7 +401,7 @@ export function AddTransactionSheet() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Invoice Month</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select an invoice month" />
@@ -395,5 +430,3 @@ export function AddTransactionSheet() {
     </Sheet>
   );
 }
-
-    

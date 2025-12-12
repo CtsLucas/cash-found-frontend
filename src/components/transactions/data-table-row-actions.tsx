@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Row } from "@tanstack/react-table"
@@ -30,10 +31,12 @@ import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
+  onEdit: (transaction: TData) => void;
 }
 
 export function DataTableRowActions<TData extends Transaction>({
   row,
+  onEdit
 }: DataTableRowActionsProps<TData>) {
   const transaction = row.original
   const firestore = useFirestore();
@@ -59,8 +62,7 @@ export function DataTableRowActions<TData extends Transaction>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[160px]">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Make a copy</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onEdit(transaction)}>Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -6,6 +7,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Transaction } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
 import { useState, useEffect } from "react"
+import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
+import { collection } from "firebase/firestore"
+import { Category, Tag } from "@/lib/types"
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -15,7 +19,7 @@ const formatCurrency = (amount: number) => {
 };
 
 
-export const columns: ColumnDef<Transaction>[] = [
+export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<Transaction>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -57,8 +61,27 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => {
+        const firestore = useFirestore();
+        const { user } = useUser();
+        const categoryId = row.getValue("category") as string;
+        const [categoryName, setCategoryName] = useState("...")
+
+        const categoriesQuery = useMemoFirebase(() => {
+            if (!user) return null;
+            return collection(firestore, `users/${user.uid}/categories`);
+          }, [firestore, user]);
+        const { data: categories } = useCollection<Category>(categoriesQuery);
+        
+        useEffect(() => {
+            if (categories) {
+                const category = categories.find(c => c.id === categoryId);
+                setCategoryName(category?.name || "Uncategorized");
+            }
+        }, [categories, categoryId])
+
+
       return (
-        <Badge variant="outline">{row.getValue("category")}</Badge>
+        <Badge variant="outline">{categoryName}</Badge>
       )
     },
     filterFn: (row, id, value) => {
@@ -69,14 +92,35 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "tags",
     header: "Tags",
     cell: ({ row }) => {
-        const tags = row.getValue("tags") as string[] | undefined;
-        if (!tags || tags.length === 0) {
+        const firestore = useFirestore();
+        const { user } = useUser();
+        const tagIds = row.getValue("tags") as string[] | undefined;
+        const [tagNames, setTagNames] = useState<string[]>([]);
+
+        const tagsQuery = useMemoFirebase(() => {
+            if (!user) return null;
+            return collection(firestore, `users/${user.uid}/tags`);
+        }, [firestore, user]);
+        const { data: allTags } = useCollection<Tag>(tagsQuery);
+        
+        useEffect(() => {
+            if (allTags && tagIds) {
+                const names = tagIds.map(tagId => {
+                    const tag = allTags.find(t => t.id === tagId);
+                    return tag ? tag.name : '';
+                }).filter(name => name);
+                setTagNames(names);
+            }
+        }, [allTags, tagIds])
+
+
+        if (!tagIds || tagIds.length === 0) {
             return null;
         }
         return (
             <div className="flex space-x-1">
-                {tags.map(tag => (
-                    <Badge key={tag} variant="secondary">{tag}</Badge>
+                {tagNames.map(name => (
+                    <Badge key={name} variant="secondary">{name}</Badge>
                 ))}
             </div>
         )
@@ -134,6 +178,6 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]
