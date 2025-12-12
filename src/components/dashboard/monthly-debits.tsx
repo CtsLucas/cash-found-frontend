@@ -63,7 +63,7 @@ interface MonthlyDebitsProps {
 export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyDebitsProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const { t, formatCurrency, formatDate } = useLanguage();
+  const { t, formatCurrency, formatDate, locale } = useLanguage();
   
   const cardsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -101,6 +101,11 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
 
   const allDebits = [...directDebits.map(d => ({...d, isInvoice: false})), ...cardInvoices.map(i => ({...i, isInvoice: true}))];
 
+  const formatInvoiceDueDate = (date: Date) => {
+    const day = format(date, 'dd');
+    const month = new Intl.DateTimeFormat(locale, { month: 'short' }).format(date);
+    return `${day}/${month}`;
+  }
 
   return (
     <Card>
@@ -137,7 +142,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
                         <TableRow key={`invoice-${index}`}>
                              <TableCell className="font-medium">{t('invoice_for')} {invoice.cardName}</TableCell>
                              <TableCell className="text-center">
-                                {invoice.dueDate ? format(invoice.dueDate, 'dd/MM') : 'N/A'}
+                                {invoice.dueDate ? formatInvoiceDueDate(invoice.dueDate) : 'N/A'}
                              </TableCell>
                              <TableCell className="text-right text-destructive font-bold">
                                 -{formatCurrency(invoice.total)}
