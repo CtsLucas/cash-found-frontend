@@ -7,9 +7,31 @@ import { placeholderImages } from '@/lib/placeholder-images';
 import { initiateGoogleSignIn, useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { doc } from 'firebase/firestore';
+import { doc, getDoc, collection, writeBatch } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { seedCategories, seedTags } from '@/lib/seed-data';
+
+const seedUserData = async (firestore: any, userId: string) => {
+  const batch = writeBatch(firestore);
+
+  // Seed Categories
+  const categoriesCollection = collection(firestore, `users/${userId}/categories`);
+  seedCategories.forEach(category => {
+    const docRef = doc(categoriesCollection);
+    batch.set(docRef, { ...category, userId });
+  });
+
+  // Seed Tags
+  const tagsCollection = collection(firestore, `users/${userId}/tags`);
+  seedTags.forEach(tag => {
+    const docRef = doc(tagsCollection);
+    batch.set(docRef, { ...tag, userId });
+  });
+
+  await batch.commit();
+};
+
 
 export default function LoginPage() {
   const loginImage = placeholderImages.find(image => image.id === 'login-illustration');
@@ -19,16 +41,27 @@ export default function LoginPage() {
   const firestore = useFirestore();
 
   useEffect(() => {
-    if (!isUserLoading && user) {
+    if (!isUserLoading && user && firestore) {
       const userRef = doc(firestore, 'users', user.uid);
-      const userData = {
-        id: user.uid,
-        googleId: user.providerData.find(p => p.providerId === 'google.com')?.uid,
-        email: user.email,
-        name: user.displayName,
-      };
-      setDocumentNonBlocking(userRef, userData, { merge: true });
-      router.push('/dashboard');
+      
+      getDoc(userRef).then(userDoc => {
+        if (!userDoc.exists()) {
+          // New user, create user doc and seed data
+          const userData = {
+            id: user.uid,
+            googleId: user.providerData.find(p => p.providerId === 'google.com')?.uid,
+            email: user.email,
+            name: user.displayName,
+          };
+          setDocumentNonBlocking(userRef, userData, { merge: true });
+          seedUserData(firestore, user.uid).then(() => {
+            router.push('/dashboard');
+          });
+        } else {
+          // Existing user, just go to dashboard
+          router.push('/dashboard');
+        }
+      });
     }
   }, [user, isUserLoading, router, firestore]);
 
@@ -74,5 +107,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
