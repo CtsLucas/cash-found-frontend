@@ -135,6 +135,11 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId) && idIsImmutable();
       allow delete: if isExistingOwner(userId);
 
+      // --- Private User Subcollections ---
+
+      // Rules for collections where queries are expected (read/list)
+      allow list: if isOwner(userId);
+
       /**
        * @description Manages user-specific financial transactions.
        * @path /users/{userId}/transactions/{transactionId}
@@ -143,7 +148,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership for reads and writes within a user's private data tree.
        */
       match /transactions/{transactionId} {
-        allow read, list: if isOwner(userId);
+        allow get: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -157,7 +162,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /categories/{categoryId} {
-        allow read, list: if isOwner(userId);
+        allow get: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -171,7 +176,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /tags/{tagId} {
-        allow read, list: if isOwner(userId);
+        allow get: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -185,7 +190,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /cards/{cardId} {
-        allow read, list: if isOwner(userId);
+        allow get: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -198,7 +203,7 @@ service cloud.firestore {
          * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent card.
          */
         match /invoices/{invoiceId} {
-          allow read, list: if isOwner(userId);
+          allow get: if isOwner(userId);
           allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
           allow update: if isExistingOwner(userId) && cardIdIsImmutable();
           allow delete: if isExistingOwner(userId);
@@ -213,7 +218,7 @@ service cloud.firestore {
        * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent transaction.
        */
       match /transactions/{transactionId}/installments/{installmentId} {
-        allow read, list: if isOwner(userId);
+        allow get: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
         allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
         allow delete: if isExistingOwner(userId);
