@@ -45,6 +45,26 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     enableHiding: false,
   },
   {
+    accessorKey: "date",
+    header: () => <div className="text-center">Date</div>,
+    cell: ({ row }) => {
+        const dateString = row.getValue("date") as string;
+        const [clientDate, setClientDate] = useState<string | null>(null);
+
+        useEffect(() => {
+          // The date string from the data is 'YYYY-MM-DD'.
+          // To avoid timezone issues where this might be interpreted as the previous day,
+          // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
+          const date = new Date(`${dateString}T00:00:00Z`);
+          setClientDate(date.toLocaleDateString(undefined, { timeZone: 'UTC' }));
+        }, [dateString]);
+        
+        return (
+            <div className="text-center">{clientDate}</div>
+        )
+    }
+  },
+  {
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => {
@@ -59,14 +79,16 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: () => <div className="text-center">Category</div>,
     cell: ({ row, table }) => {
         const categoryId = row.getValue("category") as string;
         const { categories } = (table.options.meta as { categories: Category[] })
         const category = categories?.find(c => c.id === categoryId);
 
       return (
-        <Badge variant="outline">{category?.name || "..."}</Badge>
+        <div className="text-center">
+            <Badge variant="outline">{category?.name || "..."}</Badge>
+        </div>
       )
     },
     filterFn: (row, id, value) => {
@@ -75,13 +97,13 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "tags",
-    header: "Tags",
+    header: () => <div className="text-center">Tags</div>,
     cell: ({ row, table }) => {
         const tagIds = row.getValue("tags") as string[] | undefined;
         const { tags } = (table.options.meta as { tags: Tag[] })
         
         if (!tagIds || tagIds.length === 0) {
-            return <div className="text-muted-foreground">-</div>;
+            return <div className="text-center text-muted-foreground">-</div>;
         }
 
         const tagNames = tagIds.map(tagId => {
@@ -90,7 +112,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         }).filter(name => name);
 
         return (
-            <div className="flex space-x-1">
+            <div className="flex justify-center space-x-1">
                 {tagNames.map(name => (
                     <Badge key={name} variant="secondary">{name}</Badge>
                 ))}
@@ -100,22 +122,24 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "cardId",
-    header: "Card",
+    header: () => <div className="text-center">Card</div>,
     cell: ({ row, table }) => {
         const cardId = row.getValue("cardId") as string;
         const { cards } = (table.options.meta as { cards: Card[] })
         
         if (!cardId) {
-            return <div className="text-muted-foreground">-</div>;
+            return <div className="text-center text-muted-foreground">-</div>;
         }
 
         const card = cards?.find(c => c.id === cardId);
 
         return card ? (
-            <Badge style={{ backgroundColor: card.color }} className="text-white">
-                {card.cardName}
-            </Badge>
-        ) : <div className="text-muted-foreground">-</div>;
+            <div className="text-center">
+                <Badge style={{ backgroundColor: card.color }} className="text-white">
+                    {card.cardName}
+                </Badge>
+            </div>
+        ) : <div className="text-center text-muted-foreground">-</div>;
     }
   },
   {
@@ -174,28 +198,8 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     },
   },
   {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => {
-        const dateString = row.getValue("date") as string;
-        const [clientDate, setClientDate] = useState<string | null>(null);
-
-        useEffect(() => {
-          // The date string from the data is 'YYYY-MM-DD'.
-          // To avoid timezone issues where this might be interpreted as the previous day,
-          // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
-          const date = new Date(`${dateString}T00:00:00Z`);
-          setClientDate(date.toLocaleDateString(undefined, { timeZone: 'UTC' }));
-        }, [dateString]);
-        
-        return (
-            <div>{clientDate}</div>
-        )
-    }
-  },
-  {
     id: "actions",
-    header: "Actions",
-    cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
+    header: () => <div className="text-center">Actions</div>,
+    cell: ({ row }) => <div className="flex justify-center"><DataTableRowActions row={row} onEdit={onEdit} /></div>,
   },
 ]
