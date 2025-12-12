@@ -12,7 +12,7 @@ import { useFirestore } from '@/firebase';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { seedCategories, seedTags } from '@/lib/seed-data';
 import { useLanguage } from '@/components/i18n/language-provider';
-import { getRedirectResult, User } from 'firebase/auth';
+import { User } from 'firebase/auth';
 
 const seedUserData = async (firestore: any, userId: string) => {
   const batch = writeBatch(firestore);
@@ -42,16 +42,20 @@ export default function LoginPage() {
   const router = useRouter();
   const firestore = useFirestore();
   const { t } = useLanguage();
-  const [isProcessingLogin, setIsProcessingLogin] = useState(true);
+  const [isProcessingLogin, setIsProcessingLogin] = useState(false);
 
-  const processUser = async (user: User | null) => {
-    if (!user || !firestore) return;
-    
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [isUserLoading, user, router]);
+
+  const processUser = async (user: User) => {
+    if (!firestore) return;
     const userRef = doc(firestore, 'users', user.uid);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      // New user, create user doc and seed data
       const userData = {
         id: user.uid,
         googleId: user.providerData.find(p => p.providerId === 'google.com')?.uid,
@@ -61,45 +65,25 @@ export default function LoginPage() {
       await setDocumentNonBlocking(userRef, userData, { merge: true });
       await seedUserData(firestore, user.uid);
     }
-    // Existing or new user, go to dashboard
     router.push('/dashboard');
   };
 
-  useEffect(() => {
-    if (isUserLoading) return;
-    
-    // If a user object already exists, they are logged in.
-    if (user) {
-      processUser(user);
-      return;
-    }
-
-    // If no user, check for redirect result.
-    // This is processing the redirect from Google.
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result && result.user) {
-          // User successfully signed in via redirect.
-          await processUser(result.user);
-        } else {
-          // No redirect result, user is not logged in.
-          setIsProcessingLogin(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Login redirect error:", error);
-        setIsProcessingLogin(false);
-      });
-
-  }, [isUserLoading, user, auth, firestore, router]);
-
-
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsProcessingLogin(true);
-    initiateGoogleSignIn(auth);
+    try {
+      const result = await initiateGoogleSignIn(auth);
+      if (result && result.user) {
+        await processUser(result.user);
+      } else {
+        setIsProcessingLogin(false);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      setIsProcessingLogin(false);
+    }
   };
 
-  if (isProcessingLogin) {
+  if (isUserLoading || user) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <p>{t('loading')}...</p>
@@ -117,8 +101,8 @@ export default function LoginPage() {
               {t('login.subtitle')}
             </p>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
-            {t('login.with_google')}
+          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isProcessingLogin}>
+             {isProcessingLogin ? `${t('loading')}...` : t('login.with_google')}
           </Button>
         </div>
       </div>

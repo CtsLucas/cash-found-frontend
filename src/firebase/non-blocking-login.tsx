@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Auth, // Import Auth type for type hinting
@@ -7,6 +8,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
+  UserCredential,
   // Assume getAuth and app are initialized elsewhere
 } from 'firebase/auth';
 
@@ -31,9 +33,8 @@ export function initiateEmailSignIn(authInstance: Auth, email: string, password:
   // Code continues immediately. Auth state change is handled by onAuthStateChanged listener.
 }
 
-/** Initiate Google sign-in (non-blocking). */
-export function initiateGoogleSignIn(authInstance: Auth): void {
+/** Initiate Google sign-in with popup. */
+export function initiateGoogleSignIn(authInstance: Auth): Promise<UserCredential> {
   const provider = new GoogleAuthProvider();
-  // Using signInWithRedirect to avoid popup blockers in sandboxed environments.
-  signInWithRedirect(authInstance, provider);
+  return signInWithPopup(authInstance, provider);
 }
