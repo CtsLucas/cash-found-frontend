@@ -7,6 +7,7 @@ import {
   CreditCard,
   Settings,
   ReceiptText,
+  Shapes,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/dashboard/transactions", icon: ReceiptText, label: "Transactions" },
   { href: "/dashboard/cards", icon: CreditCard, label: "Cards" },
+  { href: "/dashboard/management", icon: Shapes, label: "Management" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -35,7 +37,7 @@ export function MainNav({ isCollapsed }: { isCollapsed: boolean }) {
               href={item.href}
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
-                pathname === item.href && "bg-accent text-accent-foreground",
+                pathname.startsWith(item.href) && (item.href !== "/dashboard" || pathname === "/dashboard") && "bg-accent text-accent-foreground",
                 isCollapsed && "h-9 w-9",
                 !isCollapsed && "w-full justify-start px-3"
               )}

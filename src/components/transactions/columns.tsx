@@ -66,6 +66,23 @@ export const columns: ColumnDef<Transaction>[] = [
     },
   },
   {
+    accessorKey: "tags",
+    header: "Tags",
+    cell: ({ row }) => {
+        const tags = row.getValue("tags") as string[] | undefined;
+        if (!tags || tags.length === 0) {
+            return null;
+        }
+        return (
+            <div className="flex space-x-1">
+                {tags.map(tag => (
+                    <Badge key={tag} variant="secondary">{tag}</Badge>
+                ))}
+            </div>
+        )
+    }
+  },
+  {
     accessorKey: "amount",
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {

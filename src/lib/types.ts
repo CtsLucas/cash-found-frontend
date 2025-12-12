@@ -5,10 +5,20 @@ export type Transaction = {
   amount: number;
   deduction?: number;
   type: 'income' | 'expense';
-  category: Category;
+  category: string; // Changed to string to be more flexible
+  tags?: string[];
 };
 
-export type Category = 'Groceries' | 'Utilities' | 'Rent' | 'Salary' | 'Freelance' | 'Entertainment' | 'Transport';
+export type Category = {
+  id: string;
+  name: string;
+  type: 'income' | 'expense' | 'all';
+};
+
+export type Tag = {
+  id: string;
+  name: string;
+}
 
 export type Card = {
   id: string;
