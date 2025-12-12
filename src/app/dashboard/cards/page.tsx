@@ -6,12 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
-import { Pencil } from "lucide-react";
+import { Pencil, Wifi } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AddCardSheet } from "@/components/cards/add-card-sheet";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import { add, format } from "date-fns";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -44,12 +45,16 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
     }, [transactions, cardId]);
 
     const sortedInvoiceMonths = useMemo(() => {
-        return Object.keys(invoices).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+        // Sort from oldest to newest
+        return Object.keys(invoices).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     }, [invoices]);
 
     useEffect(() => {
         if (sortedInvoiceMonths.length > 0 && !selectedInvoice) {
-            setSelectedInvoice(sortedInvoiceMonths[0]);
+            const nextMonth = add(new Date(), { months: 1 });
+            const nextMonthString = format(nextMonth, 'MMMM yyyy');
+            const defaultSelection = sortedInvoiceMonths.includes(nextMonthString) ? nextMonthString : sortedInvoiceMonths[0];
+            setSelectedInvoice(defaultSelection);
         }
         if (carouselApi) {
             const selectedIndex = sortedInvoiceMonths.findIndex(m => m === selectedInvoice);
@@ -81,7 +86,7 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
                     const invoice = invoices[month];
                     const isSelected = selectedInvoice === month;
                     return (
-                        <CarouselItem key={month} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                        <CarouselItem key={month} className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6">
                             <div className="p-1">
                                 <UICard 
                                     className={cn("cursor-pointer", isSelected && "border-primary")}
