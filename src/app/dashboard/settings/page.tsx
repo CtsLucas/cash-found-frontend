@@ -1,11 +1,16 @@
+'use client'
+
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { useEffect, useState } from "react"
+import { ClientOnly } from "@/components/client-only"
 
 export default function SettingsPage() {
+
   return (
     <div className="space-y-6">
       <div>
@@ -31,24 +36,6 @@ export default function SettingsPage() {
             <Input id="email" type="email" defaultValue="user@example.com" />
           </div>
           <Button>Save Changes</Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>Customize the look and feel of the app.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-                <Label htmlFor="dark-mode" className="text-base">Dark Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                    Enable or disable dark mode for the application.
-                </p>
-            </div>
-            <Switch id="dark-mode" />
-          </div>
         </CardContent>
       </Card>
     </div>
