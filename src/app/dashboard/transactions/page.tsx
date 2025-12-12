@@ -25,7 +25,7 @@ import { useLanguage } from "@/components/i18n/language-provider"
   export default function TransactionsPage() {
     const firestore = useFirestore();
     const { user } = useUser();
-    const { t } = useLanguage();
+    const { t, formatCurrency, formatDate } = useLanguage();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -62,6 +62,8 @@ import { useLanguage } from "@/components/i18n/language-provider"
             setEditingTransaction(null);
         }
     }
+
+    const memoizedColumns = useMemo(() => columns(handleEdit, t, { formatCurrency, formatDate }), [t, formatCurrency, formatDate]);
     
     return (
         <>
@@ -82,9 +84,9 @@ import { useLanguage } from "@/components/i18n/language-provider"
             </div>
             <div>
                 <ClientOnly>
-                  {isLoading ? <DataTableSkeleton columnCount={columns(handleEdit, t).length} /> : 
+                  {isLoading ? <DataTableSkeleton columnCount={memoizedColumns.length} /> : 
                     (transactions && transactions.length > 0) ? (
-                      <DataTable columns={columns(handleEdit, t)} data={transactions} />
+                      <DataTable columns={memoizedColumns} data={transactions} />
                     ) : (
                       <EmptyState
                         icon={PlusCircle}

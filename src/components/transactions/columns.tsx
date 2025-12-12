@@ -6,14 +6,16 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Transaction } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
-import { useLanguage } from "../i18n/language-provider"
 import { Category, Tag, Card } from "@/lib/types"
 import type { TFunction } from "i18next"
 
-export const columns = (onEdit: (transaction: Transaction) => void, t: TFunction): ColumnDef<Transaction>[] => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { formatCurrency, formatDate } = useLanguage();
+type FormattingFunctions = {
+    formatCurrency: (amount: number) => string;
+    formatDate: (dateString: string) => string;
+}
 
+export const columns = (onEdit: (transaction: Transaction) => void, t: TFunction, { formatCurrency, formatDate }: FormattingFunctions): ColumnDef<Transaction>[] => {
+  
   return [
   {
     id: "select",
