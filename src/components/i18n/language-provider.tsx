@@ -64,7 +64,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return new Intl.DateTimeFormat(locale, { 
       timeZone: 'UTC',
       day: '2-digit',
-      month: 'short',
+      month: '2-digit',
       year: 'numeric' 
     }).format(date);
   }, [locale]);

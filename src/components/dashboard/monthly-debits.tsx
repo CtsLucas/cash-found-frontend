@@ -102,9 +102,11 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
   const allDebits = [...directDebits.map(d => ({...d, isInvoice: false})), ...cardInvoices.map(i => ({...i, isInvoice: true}))];
 
   const formatInvoiceDueDate = (date: Date) => {
-    const day = format(date, 'dd');
-    const month = new Intl.DateTimeFormat(locale, { month: 'short' }).format(date);
-    return `${day}/${month}`;
+    return new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(date);
   }
 
   return (
