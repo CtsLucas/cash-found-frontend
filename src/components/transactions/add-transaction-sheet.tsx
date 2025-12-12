@@ -104,7 +104,7 @@ export function AddTransactionSheet() {
   const amount = form.watch("amount");
   const deduction = form.watch("deduction");
 
-  const calculatedAmount = type === 'expense' ? (amount || 0) - (deduction || 0) : amount;
+  const calculatedAmount = type === 'expense' ? (Number(amount) || 0) - (Number(deduction) || 0) : (Number(amount) || 0);
 
   React.useEffect(() => {
     if (user) {
@@ -365,7 +365,7 @@ export function AddTransactionSheet() {
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select an invoice month" />
-                                        </SelectTrigger>
+                                        </Trigger>
                                         </FormControl>
                                         <SelectContent>
                                             {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}
@@ -390,5 +390,3 @@ export function AddTransactionSheet() {
     </Sheet>
   );
 }
-
-    
