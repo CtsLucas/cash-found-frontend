@@ -136,6 +136,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
               ...editingTransaction,
               date: editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : '',
               tags: editingTransaction.tags || [],
+              cardId: editingTransaction.cardId || "",
+              invoiceMonth: editingTransaction.invoiceMonth || ""
             });
         } else {
             form.reset(defaultValues);
@@ -341,12 +343,13 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                 {tags?.map((tag) => (
                                                     <CommandItem
                                                         key={tag.id}
-                                                        onSelect={() => {
-                                                            const currentValue = field.value || [];
-                                                            if (currentValue.includes(tag.id)) {
-                                                                field.onChange(currentValue.filter(id => id !== tag.id));
+                                                        onSelect={(currentValue) => {
+                                                            const currentValueArray = field.value || [];
+                                                            const value = tag.id;
+                                                            if (currentValueArray.includes(value)) {
+                                                                field.onChange(currentValueArray.filter(id => id !== value));
                                                             } else {
-                                                                field.onChange([...currentValue, tag.id]);
+                                                                field.onChange([...currentValueArray, value]);
                                                             }
                                                         }}
                                                     >
@@ -435,4 +438,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
- 

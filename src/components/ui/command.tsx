@@ -122,6 +122,12 @@ const CommandItem = React.forwardRef<
       className
     )}
     {...props}
+    onSelect={(...args) => {
+      if (props.onSelect) {
+        // @ts-ignore
+        props.onSelect(...args);
+      }
+    }}
   />
 ))
 
@@ -154,5 +160,3 @@ export {
   CommandSeparator,
   CommandShortcut,
 }
-
-    
