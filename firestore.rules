@@ -134,91 +134,93 @@ service cloud.firestore {
       allow create: if isOwner(userId) && hasValidIdOnCreate(userId);
       allow update: if isExistingOwner(userId) && idIsImmutable();
       allow delete: if isExistingOwner(userId);
-    }
 
-    /**
-     * @description Manages user-specific financial transactions.
-     * @path /users/{userId}/transactions/{transactionId}
-     * @allow A user (auth.uid='user123') can (create) a new transaction in their own subcollection `/users/user123/transactions/tx456`.
-     * @deny A user (auth.uid='userABC') cannot (list) transactions at `/users/user123/transactions`.
-     * @principle Enforces strict data ownership within a user's private data tree.
-     */
-    match /users/{userId}/transactions/{transactionId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isExistingOwner(userId) && userIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
+      /**
+       * @description Manages user-specific financial transactions.
+       * @path /users/{userId}/transactions/{transactionId}
+       * @allow A user (auth.uid='user123') can (create) a new transaction in their own subcollection `/users/user123/transactions/tx456`.
+       * @deny A user (auth.uid='userABC') cannot (list) transactions at `/users/user123/transactions`.
+       * @principle Enforces strict data ownership within a user's private data tree.
+       */
+      match /transactions/{transactionId} {
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+        allow update: if isExistingOwner(userId) && userIdIsImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
 
-    /**
-     * @description Manages user-specific categories for transactions.
-     * @path /users/{userId}/categories/{categoryId}
-     * @allow A user (auth.uid='user123') can (list) their own categories at `/users/user123/categories`.
-     * @deny A user (auth.uid='userABC') cannot (delete) a category at `/users/user123/categories/cat789`.
-     * @principle Enforces strict data ownership within a user's private data tree.
-     */
-    match /users/{userId}/categories/{categoryId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isExistingOwner(userId) && userIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
+      // This rule is required to allow collection queries.
+      allow list: if isOwner(userId);
 
-    /**
-     * @description Manages user-specific tags for transactions.
-     * @path /users/{userId}/tags/{tagId}
-     * @allow A user (auth.uid='user123') can (update) their own tag at `/users/user123/tags/tag456`.
-     * @deny An anonymous user cannot (get) any tag.
-     * @principle Enforces strict data ownership within a user's private data tree.
-     */
-    match /users/{userId}/tags/{tagId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isExistingOwner(userId) && userIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
+      /**
+       * @description Manages user-specific categories for transactions.
+       * @path /users/{userId}/categories/{categoryId}
+       * @allow A user (auth.uid='user123') can (list) their own categories at `/users/user123/categories`.
+       * @deny A user (auth.uid='userABC') cannot (delete) a category at `/users/user123/categories/cat789`.
+       * @principle Enforces strict data ownership within a user's private data tree.
+       */
+      match /categories/{categoryId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+        allow update: if isExistingOwner(userId) && userIdIsImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
 
-    /**
-     * @description Manages user-specific credit/debit cards.
-     * @path /users/{userId}/cards/{cardId}
-     * @allow A user (auth.uid='user123') can (get) their own card at `/users/user123/cards/card789`.
-     * @deny A user (auth.uid='userABC') cannot (create) a card in another user's account.
-     * @principle Enforces strict data ownership within a user's private data tree.
-     */
-    match /users/{userId}/cards/{cardId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isExistingOwner(userId) && userIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
+      /**
+       * @description Manages user-specific tags for transactions.
+       * @path /users/{userId}/tags/{tagId}
+       * @allow A user (auth.uid='user123') can (update) their own tag at `/users/user123/tags/tag456`.
+       * @deny An anonymous user cannot (get) any tag.
+       * @principle Enforces strict data ownership within a user's private data tree.
+       */
+      match /tags/{tagId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+        allow update: if isExistingOwner(userId) && userIdIsImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
 
-    /**
-     * @description Manages installment payments for a specific transaction.
-     * @path /users/{userId}/transactions/{transactionId}/installments/{installmentId}
-     * @allow A user (auth.uid='user123') can (list) installments for their own transaction at `/users/user123/transactions/tx456/installments`.
-     * @deny A user (auth.uid='userABC') cannot (get) an installment belonging to another user.
-     * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent transaction.
-     */
-    match /users/{userId}/transactions/{transactionId}/installments/{installmentId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
-      allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
-    
-    /**
-     * @description Manages invoices for a specific card.
-     * @path /users/{userId}/cards/{cardId}/invoices/{invoiceId}
-     * @allow A user (auth.uid='user123') can (create) an invoice for their own card at `/users/user123/cards/card789/invoices/inv001`.
-     * @deny A user (auth.uid='userABC') cannot (list) invoices for another user's card.
-     * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent card.
-     */
-    match /users/{userId}/cards/{cardId}/invoices/{invoiceId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
-      allow update: if isExistingOwner(userId) && cardIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
+      /**
+       * @description Manages user-specific credit/debit cards.
+       * @path /users/{userId}/cards/{cardId}
+       * @allow A user (auth.uid='user123') can (get) their own card at `/users/user123/cards/card789`.
+       * @deny A user (auth.uid='userABC') cannot (create) a card in another user's account.
+       * @principle Enforces strict data ownership within a user's private data tree.
+       */
+      match /cards/{cardId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+        allow update: if isExistingOwner(userId) && userIdIsImmutable();
+        allow delete: if isExistingOwner(userId);
 
+        /**
+         * @description Manages invoices for a specific card.
+         * @path /users/{userId}/cards/{cardId}/invoices/{invoiceId}
+         * @allow A user (auth.uid='user123') can (create) an invoice for their own card at `/users/user123/cards/card789/invoices/inv001`.
+         * @deny A user (auth.uid='userABC') cannot (list) invoices for another user's card.
+         * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent card.
+         */
+        match /invoices/{invoiceId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
+          allow update: if isExistingOwner(userId) && cardIdIsImmutable();
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+
+      /**
+       * @description Manages installment payments for a specific transaction.
+       * @path /users/{userId}/transactions/{transactionId}/installments/{installmentId}
+       * @allow A user (auth.uid='user123') can (list) installments for their own transaction at `/users/user123/transactions/tx456/installments`.
+       * @deny A user (auth.uid='userABC') cannot (get) an installment belonging to another user.
+       * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent transaction.
+       */
+      match /transactions/{transactionId}/installments/{installmentId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
+        allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+    }
   }
 }
