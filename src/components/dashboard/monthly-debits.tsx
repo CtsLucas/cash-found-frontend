@@ -22,13 +22,7 @@ import { collection } from "firebase/firestore";
 import { Skeleton } from "../ui/skeleton";
 import { useMemo } from "react";
 import { format, setDate } from "date-fns";
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-};
+import { useLanguage } from "../i18n/language-provider";
 
 const MonthlyDebitsSkeleton = () => {
     return (
@@ -69,6 +63,7 @@ interface MonthlyDebitsProps {
 export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyDebitsProps) {
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t, formatCurrency, formatDate } = useLanguage();
   
   const cardsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -91,7 +86,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
             if (!acc[t.cardId!]) {
                 const card = cards.find(c => c.id === t.cardId);
                 acc[t.cardId!] = {
-                    cardName: card?.cardName || 'Unknown Card',
+                    cardName: card?.cardName || t('unknown_card'),
                     dueDate: card ? setDate(currentDate, card.dueDate) : null,
                     total: 0,
                 };
@@ -102,7 +97,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
     
     return { directDebits, cardInvoices: Object.values(cardInvoices) };
 
-  }, [transactions, cards, currentDate]);
+  }, [transactions, cards, currentDate, t]);
 
   const allDebits = [...directDebits.map(d => ({...d, isInvoice: false})), ...cardInvoices.map(i => ({...i, isInvoice: true}))];
 
@@ -110,27 +105,27 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Monthly Debits</CardTitle>
-        <CardDescription>A summary of your expenses for the month, including credit card invoices.</CardDescription>
+        <CardTitle className="font-headline">{t('dashboard.monthly_debits.title')}</CardTitle>
+        <CardDescription>{t('dashboard.monthly_debits.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading || isLoadingCards ? <MonthlyDebitsSkeleton /> : (
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-center">Date / Vencimento</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>{t('description')}</TableHead>
+                        <TableHead className="text-center">{t('date')} / {t('due_date')}</TableHead>
+                        <TableHead className="text-right">{t('amount')}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {!isLoading && allDebits.length === 0 && <TableRow><TableCell colSpan={3} className="text-center">No debits for this month.</TableCell></TableRow>}
+                    {!isLoading && allDebits.length === 0 && <TableRow><TableCell colSpan={3} className="text-center">{t('dashboard.monthly_debits.empty')}</TableCell></TableRow>}
                     
                     {directDebits.map((debit) => (
                         <TableRow key={debit.id}>
                             <TableCell>{debit.description}</TableCell>
                             <TableCell className="text-center">
-                                {new Date(`${debit.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC' })}
+                                {formatDate(debit.date)}
                             </TableCell>
                             <TableCell className="text-right text-destructive">
                                 -{formatCurrency(debit.amount - (debit.deduction || 0))}
@@ -140,7 +135,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
                     
                     {cardInvoices.map((invoice, index) => (
                         <TableRow key={`invoice-${index}`}>
-                             <TableCell className="font-medium">Invoice for {invoice.cardName}</TableCell>
+                             <TableCell className="font-medium">{t('invoice_for')} {invoice.cardName}</TableCell>
                              <TableCell className="text-center">
                                 {invoice.dueDate ? format(invoice.dueDate, 'dd/MM') : 'N/A'}
                              </TableCell>

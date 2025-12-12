@@ -56,4 +56,6 @@ export type Installment = {
     amount: number;
     isPaid: boolean;
 };
+
+export type Locale = 'en' | 'pt-BR';
     

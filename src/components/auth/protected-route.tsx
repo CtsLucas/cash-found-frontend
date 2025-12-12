@@ -4,10 +4,12 @@
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
+import { useLanguage } from '../i18n/language-provider';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -18,12 +20,10 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   if (isUserLoading || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p>Loading...</p>
+        <p>{t('loading')}...</p>
       </div>
     );
   }
 
   return <>{children}</>;
 }
-
-    

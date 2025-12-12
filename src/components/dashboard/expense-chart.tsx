@@ -22,6 +22,7 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebas
 import { collection } from "firebase/firestore"
 import { Skeleton } from "../ui/skeleton"
 import { format } from "date-fns"
+import { useLanguage } from "../i18n/language-provider"
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -58,6 +59,7 @@ const ExpenseChartSkeleton = () => (
 export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProps) {
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t } = useLanguage();
 
   const categoriesQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -73,7 +75,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
     const expensesByCategory = transactions
       .filter(t => t.type === 'expense')
       .reduce((acc, t) => {
-        const categoryName = categories.find(c => c.id === t.category)?.name || 'Uncategorized';
+        const categoryName = categories.find(c => c.id === t.category)?.name || t('uncategorized');
         if (!acc[categoryName]) {
           acc[categoryName] = 0;
         }
@@ -88,7 +90,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
     })).sort((a, b) => b.value - a.value);
 
     const config = {
-      value: { label: "Value" },
+      value: { label: t('value') },
       ...data.reduce((acc, item) => {
         acc[item.category] = {
           label: item.category,
@@ -99,7 +101,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
     };
 
     return { expenseData: data, chartConfig: config };
-  }, [transactions, categories]);
+  }, [transactions, categories, t]);
   
   if (isLoading) {
     return <ExpenseChartSkeleton />;
@@ -108,7 +110,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
   return (
     <Card className="flex flex-col">
       <CardHeader>
-        <CardTitle className="font-headline">Expense Breakdown</CardTitle>
+        <CardTitle className="font-headline">{t('dashboard.expense_breakdown.title')}</CardTitle>
         <CardDescription>{format(date, 'MMMM yyyy')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -132,7 +134,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
           </ChartContainer>
         ) : (
           <div className="flex h-full min-h-[250px] items-center justify-center">
-            <p className="text-muted-foreground">No expense data for this month.</p>
+            <p className="text-muted-foreground">{t('dashboard.expense_breakdown.empty')}</p>
           </div>
         )}
       </CardContent>

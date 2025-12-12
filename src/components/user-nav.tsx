@@ -14,13 +14,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { useAuth, useUser } from "@/firebase"
-import { getAuth, signOut } from "firebase/auth"
+import { signOut } from "firebase/auth"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "./i18n/language-provider"
 
 export function UserNav() {
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     signOut(auth).then(() => {
@@ -50,24 +52,22 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            Profile
+            {t('profile')}
           </DropdownMenuItem>
           <DropdownMenuItem>
-            Billing
+            {t('billing')}
           </DropdownMenuItem>
           <Link href="/dashboard/settings">
             <DropdownMenuItem>
-              Settings
+              {t('settings.title')}
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
-          Log out
+          {t('logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
-
-    

@@ -22,6 +22,7 @@ import { collection, deleteDoc, doc, getDocs, query, where, writeBatch } from "f
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "../i18n/language-provider"
 
 
 interface DataTableRowActionsProps<TData> {
@@ -36,6 +37,7 @@ export function DataTableRowActions<TData extends Transaction>({
   const transaction = row.original
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t } = useLanguage();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -72,29 +74,29 @@ export function DataTableRowActions<TData extends Transaction>({
             onClick={() => onEdit(transaction)}
         >
             <Pencil className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
+            <span className="sr-only">{t('edit')}</span>
         </Button>
         <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Delete</span>
+                <span className="sr-only">{t('delete')}</span>
             </Button>
         </AlertDialogTrigger>
       </div>
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{t('are_you_sure')}</AlertDialogTitle>
           <AlertDialogDescription>
             {isInstallment 
-              ? "This action cannot be undone. This will permanently delete this transaction and all its related installments."
-              : "This action cannot be undone. This will permanently delete the transaction."
+              ? t('transactions.delete_installment_description')
+              : t('transactions.delete_description')
             }
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className={cn(buttonVariants({ variant: "destructive" }))}>Continue</AlertDialogAction>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} className={cn(buttonVariants({ variant: "destructive" }))}>{t('continue')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,0 +1,186 @@
+{
+    "loading": "Loading",
+    "error": "Error",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "export": "Export",
+    "add": "Add",
+    "name": "Name",
+    "description": "Description",
+    "date": "Date",
+    "amount": "Amount",
+    "category": "Category",
+    "categories": "Categories",
+    "tag": "Tag",
+    "tags": "Tags",
+    "card": "Card",
+    "type": "Type",
+    "actions": "Actions",
+    "due_date": "Due Date",
+    "due": "Due",
+    "are_you_sure": "Are you absolutely sure?",
+    "no_results": "No results.",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "toggle_nav": "Toggle navigation menu",
+    "profile": "Profile",
+    "billing": "Billing",
+    "logout": "Log out",
+    "income": "Income",
+    "expense": "Expense",
+    "deduction": "Deduction",
+    "final_amount": "Final Amount",
+    "installments": "Installments",
+    "installment": "Installment",
+    "invoice_month": "Invoice Month",
+    "invoice_for": "Invoice for",
+    "none": "None",
+    "unknown_card": "Unknown Card",
+    "uncategorized": "Uncategorized",
+    "value": "Value",
+
+    "login": {
+        "subtitle": "Sign in to manage your finances",
+        "with_google": "Login with Google"
+    },
+
+    "dashboard": {
+        "title": "Dashboard",
+        "total_income": "Total Income",
+        "total_expenses": "Total Expenses",
+        "balance": "Balance",
+        "balance_description": "Your account balance this month",
+        "monthly_debits": {
+            "title": "Monthly Debits",
+            "description": "A summary of your expenses for the month, including credit card invoices.",
+            "empty": "No debits for this month."
+        },
+        "recent_transactions": {
+            "title": "Recent Transactions",
+            "description": "A quick look at your latest activity.",
+            "empty": "No recent transactions."
+        },
+        "expense_breakdown": {
+            "title": "Expense Breakdown",
+            "empty": "No expense data for this month."
+        }
+    },
+
+    "transactions": {
+        "title": "Transactions",
+        "add_button": "Add Transaction",
+        "edit_title": "Edit transaction",
+        "add_title": "Add a new transaction",
+        "edit_description": "Update the details of your financial record.",
+        "add_description": "Fill in the details below to add a new financial record.",
+        "delete_description": "This action cannot be undone. This will permanently delete the transaction.",
+        "delete_installment_description": "This action cannot be undone. This will permanently delete this transaction and all its related installments.",
+        "empty": {
+            "title": "No transactions found",
+            "description": "Get started by adding your first transaction for this period."
+        },
+        "form": {
+            "description": {
+                "placeholder": "e.g. Groceries"
+            },
+            "category": {
+                "placeholder": "Select a category"
+            },
+            "tags": {
+                "placeholder": "Select tags",
+                "search_placeholder": "Search tags...",
+                "empty": "No tags found."
+            },
+            "card": {
+                "placeholder": "Select a card"
+            },
+            "invoice_month": {
+                "placeholder": "Select an invoice month"
+            }
+        }
+    },
+
+    "cards": {
+        "title": "My Cards",
+        "add_button": "Add Card",
+        "edit_title": "Edit Card",
+        "add_title": "Add a new card",
+        "edit_description": "Update the details of your card.",
+        "add_description": "Fill in the details below to add a new card to your wallet.",
+        "available_limit": "Available Limit",
+        "no_invoices": "No invoices found for this card.",
+        "invoices_for": "Invoices for",
+        "select_invoice": "Select an invoice to see its transactions.",
+        "empty": {
+            "title": "No cards added yet",
+            "description": "Get started by adding your first credit or debit card to manage your finances."
+        },
+        "form": {
+            "name": {
+                "label": "Card Name",
+                "placeholder": "e.g. Chase Sapphire"
+            },
+            "limit": {
+                "label": "Credit Limit"
+            },
+            "due_day": {
+                "label": "Due Day"
+            },
+            "last4": {
+                "label": "Last 4 digits"
+            },
+            "color": {
+                "label": "Card Color"
+            }
+        }
+    },
+
+    "management": {
+        "title": "Management",
+        "form": {
+            "add_description": "Fill in the details below to add a new item.",
+            "edit_description": "Update the details for your item."
+        },
+        "categories": {
+            "empty": {
+                "title": "No categories created",
+                "description": "Get started by creating your first category."
+            },
+            "delete_description": "This action cannot be undone. This will permanently delete this category."
+        },
+        "tags": {
+            "empty": {
+                "title": "No tags created",
+                "description": "Get started by creating your first tag."
+            },
+            "delete_description": "This action cannot be undone. This will permanently delete this tag."
+        }
+    },
+
+    "settings": {
+        "title": "Settings",
+        "description": "Manage your account settings and preferences.",
+        "language": {
+            "title": "Language",
+            "description": "Choose the language for the application interface.",
+            "label": "Language",
+            "select_placeholder": "Select a language"
+        },
+        "danger_zone": {
+            "title": "Danger Zone",
+            "description": "These actions are permanent and cannot be undone.",
+            "delete": {
+                "button": "Delete All Data",
+                "alert_description": "This action cannot be undone. This will permanently delete all of your data, including transactions, cards, categories, and tags.",
+                "success_title": "Data Deleted",
+                "success_description": "All your data has been successfully deleted.",
+                "error_title": "Deletion Failed",
+                "error_description": "Could not delete data. Please try again.",
+                "error_description_generic": "An error occurred while deleting your data. Please try again."
+            }
+        }
+    }
+}

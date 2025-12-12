@@ -5,8 +5,9 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tag } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
+import { TFunction } from "i18next"
 
-export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
+export const tagColumns = (onEdit: (tag: Tag) => void, t: TFunction): ColumnDef<Tag>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -16,7 +17,7 @@ export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('select_all')}
         className="translate-y-[2px]"
       />
     ),
@@ -24,7 +25,7 @@ export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('select_row')}
         className="translate-y-[2px]"
       />
     ),
@@ -33,7 +34,7 @@ export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: t('name'),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
@@ -46,7 +47,7 @@ export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: t('actions'),
     cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]

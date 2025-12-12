@@ -17,13 +17,15 @@ import { collection, query, where, orderBy } from "firebase/firestore"
 import { useMemo, useState } from "react"
 import { Transaction } from "@/lib/types"
 import { MonthYearPicker } from "@/components/transactions/month-year-picker"
-import { startOfMonth, endOfMonth, format, addMonths } from "date-fns"
+import { startOfMonth, addMonths, format } from "date-fns"
 import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
 import { EmptyState } from "@/components/empty-state"
+import { useLanguage } from "@/components/i18n/language-provider"
   
   export default function TransactionsPage() {
     const firestore = useFirestore();
     const { user } = useUser();
+    const { t } = useLanguage();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -64,7 +66,7 @@ import { EmptyState } from "@/components/empty-state"
     return (
         <>
             <div className="flex items-center">
-                <h1 className="text-3xl font-bold tracking-tight font-headline">Transactions</h1>
+                <h1 className="text-3xl font-bold tracking-tight font-headline">{t('transactions.title')}</h1>
             </div>
             <div className="flex items-center">
                 <MonthYearPicker date={currentDate} setDate={setCurrentDate} />
@@ -72,7 +74,7 @@ import { EmptyState } from "@/components/empty-state"
                     <Button size="sm" variant="outline" className="h-8 gap-1">
                         <File className="h-3.5 w-3.5" />
                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Export
+                        {t('export')}
                         </span>
                     </Button>
                     <AddTransactionSheet isOpen={isSheetOpen} onOpenChange={handleSheetOpenChange} editingTransaction={editingTransaction} />
@@ -80,14 +82,14 @@ import { EmptyState } from "@/components/empty-state"
             </div>
             <div>
                 <ClientOnly>
-                  {isLoading ? <DataTableSkeleton columnCount={columns(handleEdit).length} /> : 
+                  {isLoading ? <DataTableSkeleton columnCount={columns(handleEdit, t).length} /> : 
                     (transactions && transactions.length > 0) ? (
-                      <DataTable columns={columns(handleEdit)} data={transactions} />
+                      <DataTable columns={columns(handleEdit, t)} data={transactions} />
                     ) : (
                       <EmptyState
                         icon={PlusCircle}
-                        title="No transactions found"
-                        description="Get started by adding your first transaction for this period."
+                        title={t('transactions.empty.title')}
+                        description={t('transactions.empty.description')}
                       >
                          <AddTransactionSheet isOpen={isSheetOpen} onOpenChange={handleSheetOpenChange} editingTransaction={editingTransaction} />
                       </EmptyState>

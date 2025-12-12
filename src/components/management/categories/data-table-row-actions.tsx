@@ -23,6 +23,7 @@ import { doc } from "firebase/firestore"
 import { useState } from "react"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/components/i18n/language-provider"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -36,6 +37,7 @@ export function DataTableRowActions<TData extends Category>({
   const item = row.original
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t } = useLanguage();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = () => {
@@ -56,26 +58,26 @@ export function DataTableRowActions<TData extends Category>({
           onClick={() => onEdit(item)}
         >
           <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit</span>
+          <span className="sr-only">{t('edit')}</span>
         </Button>
         <AlertDialogTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
             <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Delete</span>
+            <span className="sr-only">{t('delete')}</span>
           </Button>
         </AlertDialogTrigger>
       </div>
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{t('are_you_sure')}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this category.
+            {t('management.categories.delete_description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className={cn(buttonVariants({ variant: "destructive" }))}>Continue</AlertDialogAction>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} className={cn(buttonVariants({ variant: "destructive" }))}>{t('continue')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -6,47 +6,46 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Transaction } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
-import { useState, useEffect, useMemo } from "react"
-import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { useLanguage } from "../i18n/language-provider"
 import { Category, Tag, Card } from "@/lib/types"
+import type { TFunction } from "i18next"
 
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-};
+export const columns = (onEdit: (transaction: Transaction) => void, t: TFunction): ColumnDef<Transaction>[] => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { formatCurrency, formatDate } = useLanguage();
 
-
-export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<Transaction>[] => [
+  return [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
+      <div className="text-center">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label={t('select_all')}
+          className="translate-y-[2px]"
+        />
+      </div>
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-      />
+      <div className="text-center">
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label={t('select_row')}
+          className="translate-y-[2px]"
+        />
+      </div>
     ),
     enableSorting: false,
     enableHiding: false,
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: t('description'),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
@@ -59,27 +58,17 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "date",
-    header: () => <div className="text-center">Date</div>,
+    header: () => <div className="text-center">{t('date')}</div>,
     cell: ({ row }) => {
         const dateString = row.getValue("date") as string;
-        const [clientDate, setClientDate] = useState<string | null>(null);
-
-        useEffect(() => {
-          // The date string from the data is 'YYYY-MM-DD'.
-          // To avoid timezone issues where this might be interpreted as the previous day,
-          // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
-          const date = new Date(`${dateString}T00:00:00Z`);
-          setClientDate(date.toLocaleDateString(undefined, { timeZone: 'UTC' }));
-        }, [dateString]);
-        
         return (
-            <div className="text-center">{clientDate}</div>
+            <div className="text-center font-medium">{formatDate(dateString)}</div>
         )
     }
   },
   {
     accessorKey: "category",
-    header: () => <div className="text-center">Category</div>,
+    header: () => <div className="text-center">{t('category')}</div>,
     cell: ({ row, table }) => {
         const categoryId = row.getValue("category") as string;
         const { categories } = (table.options.meta as { categories: Category[] })
@@ -97,7 +86,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "tags",
-    header: () => <div className="text-center">Tags</div>,
+    header: () => <div className="text-center">{t('tags')}</div>,
     cell: ({ row, table }) => {
         const tagIds = row.getValue("tags") as string[] | undefined;
         const { tags } = (table.options.meta as { tags: Tag[] })
@@ -122,7 +111,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "cardId",
-    header: () => <div className="text-center">Card</div>,
+    header: () => <div className="text-center">{t('card')}</div>,
     cell: ({ row, table }) => {
         const cardId = row.getValue("cardId") as string;
         const { cards } = (table.options.meta as { cards: Card[] })
@@ -144,7 +133,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "installments",
-    header: () => <div className="text-center">Installments</div>,
+    header: () => <div className="text-center">{t('installments')}</div>,
     cell: ({ row }) => {
       const installments = row.original.installments as number | undefined;
       const currentInstallment = row.original.currentInstallment as number | undefined;
@@ -170,7 +159,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    header: () => <div className="text-right">{t('amount')}</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"))
       const { type, deduction } = row.original
@@ -199,7 +188,8 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     id: "actions",
-    header: () => <div className="text-center">Actions</div>,
+    header: () => <div className="text-center">{t('actions')}</div>,
     cell: ({ row }) => <div className="flex justify-center"><DataTableRowActions row={row} onEdit={onEdit} /></div>,
   },
 ]
+}

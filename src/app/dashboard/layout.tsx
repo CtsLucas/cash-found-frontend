@@ -17,12 +17,14 @@ import { UserNav } from "@/components/user-nav";
 import { MainNav } from "@/components/main-nav";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { useLanguage } from "@/components/i18n/language-provider";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLanguage();
   return (
     <ProtectedRoute>
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr]">
@@ -51,7 +53,7 @@ export default function DashboardLayout({
                   className="shrink-0 md:hidden"
                 >
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle navigation menu</span>
+                  <span className="sr-only">{t('toggle_nav')}</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col">

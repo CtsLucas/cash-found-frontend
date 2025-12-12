@@ -6,27 +6,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
-import { Pencil, Wifi } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AddCardSheet } from "@/components/cards/add-card-sheet";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { add, format, setDate, isValid } from "date-fns";
+import { add, format } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
 import { PlusCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
+import { useLanguage } from "@/components/i18n/language-provider";
 
 function InvoicesList({ cardId, transactions }: { cardId: string, transactions: Transaction[] | null }) {
     const [carouselApi, setCarouselApi] = useState<CarouselApi>()
     const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+    const { t, formatCurrency, formatDate } = useLanguage();
 
     const invoices = useMemo(() => {
         if (!transactions) return {};
@@ -76,7 +71,7 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
     }
     
     if (sortedInvoiceMonths.length === 0) {
-        return <p className="text-muted-foreground text-center p-4">No invoices found for this card.</p>
+        return <p className="text-muted-foreground text-center p-4">{t('cards.no_invoices')}</p>
     }
 
     const selectedTransactions = selectedInvoice ? invoices[selectedInvoice]?.transactions : [];
@@ -114,16 +109,16 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
              <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Installment</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>{t('date')}</TableHead>
+                        <TableHead>{t('description')}</TableHead>
+                        <TableHead>{t('installment')}</TableHead>
+                        <TableHead className="text-right">{t('amount')}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {selectedTransactions.map(t => (
                         <TableRow key={t.id}>
-                            <TableCell>{new Date(`${t.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC' })}</TableCell>
+                            <TableCell>{formatDate(t.date)}</TableCell>
                             <TableCell>{t.description}</TableCell>
                             <TableCell>
                                 {t.installments && t.currentInstallment ? `${t.currentInstallment}/${t.installments}` : '-'}
@@ -150,6 +145,7 @@ const CardsSkeleton = () => (
 export default function CardsPage() {
     const firestore = useFirestore();
     const { user } = useUser();
+    const { t, formatCurrency } = useLanguage();
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
     const [editingCard, setEditingCard] = useState<CardType | null>(null);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -198,7 +194,7 @@ export default function CardsPage() {
   return (
     <div className="flex flex-col gap-4">
         <div className="flex items-center">
-            <h1 className="text-3xl font-bold tracking-tight font-headline">My Cards</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline">{t('cards.title')}</h1>
             <div className="ml-auto flex items-center gap-2">
                 <AddCardSheet isOpen={isSheetOpen && !editingCard} onOpenChange={handleSheetOpenChange} />
             </div>
@@ -224,7 +220,7 @@ export default function CardsPage() {
                                     
                                     <div className="flex items-center gap-3">
                                         <div>
-                                            <p className="text-xs opacity-80">Available Limit</p>
+                                            <p className="text-xs opacity-80">{t('cards.available_limit')}</p>
                                             <p className="text-xl font-bold tracking-tight">{formatCurrency(availableLimit)}</p>
                                         </div>
                                     </div>
@@ -240,7 +236,7 @@ export default function CardsPage() {
                                     </AddCardSheet>
 
                                     <footer className="flex justify-between items-end text-xs">
-                                        <span>Due: {card.dueDate ?? 'N/A'}</span>
+                                        <span>{t('due')}: {card.dueDate ?? 'N/A'}</span>
                                         <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
                                     </footer>
                                 </div>
@@ -251,8 +247,8 @@ export default function CardsPage() {
             ) : (
                 <EmptyState
                     icon={PlusCircle}
-                    title="No cards added yet"
-                    description="Get started by adding your first credit or debit card to manage your finances."
+                    title={t('cards.empty.title')}
+                    description={t('cards.empty.description')}
                 >
                     <AddCardSheet />
                 </EmptyState>
@@ -262,11 +258,11 @@ export default function CardsPage() {
         {selectedCardId && (
             <UICard>
                 <CardHeader>
-                    <CardTitle>Invoices for {cards?.find(c => c.id === selectedCardId)?.cardName}</CardTitle>
-                    <CardDescription>Select an invoice to see its transactions.</CardDescription>
+                    <CardTitle>{t('cards.invoices_for')} {cards?.find(c => c.id === selectedCardId)?.cardName}</CardTitle>
+                    <CardDescription>{t('cards.select_invoice')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {isLoadingTransactions ? <p>Loading invoices...</p> : <InvoicesList cardId={selectedCardId} transactions={allTransactions} />}
+                    {isLoadingTransactions ? <p>{t('loading')}...</p> : <InvoicesList cardId={selectedCardId} transactions={allTransactions} />}
                 </CardContent>
             </UICard>
         )}

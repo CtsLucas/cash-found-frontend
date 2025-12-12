@@ -16,17 +16,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/transactions", icon: ReceiptText, label: "Transactions" },
-  { href: "/dashboard/cards", icon: CreditCard, label: "Cards" },
-  { href: "/dashboard/management", icon: Shapes, label: "Management" },
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
-];
+import { useLanguage } from "./i18n/language-provider";
 
 export function MainNav({ isCollapsed }: { isCollapsed: boolean }) {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/dashboard", icon: LayoutDashboard, label: t('dashboard.title') },
+    { href: "/dashboard/transactions", icon: ReceiptText, label: t('transactions.title') },
+    { href: "/dashboard/cards", icon: CreditCard, label: t('cards.title') },
+    { href: "/dashboard/management", icon: Shapes, label: t('management.title') },
+    { href: "/dashboard/settings", icon: Settings, label: t('settings.title') },
+  ];
 
   return (
     <nav className="grid items-start gap-2 px-2 text-sm font-medium lg:px-4 sm:py-5">

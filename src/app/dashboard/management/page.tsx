@@ -19,10 +19,12 @@ import { useState } from "react"
 import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
 import { EmptyState } from "@/components/empty-state"
 import { PlusCircle } from "lucide-react"
+import { useLanguage } from "@/components/i18n/language-provider"
   
 export default function ManagementPage() {
     const firestore = useFirestore();
     const { user } = useUser();
+    const { t } = useLanguage();
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editingTag, setEditingTag] = useState<Tag | null>(null);
     const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
@@ -68,13 +70,13 @@ export default function ManagementPage() {
 return (
     <>
         <div className="flex items-center">
-            <h1 className="text-3xl font-bold tracking-tight font-headline">Management</h1>
+            <h1 className="text-3xl font-bold tracking-tight font-headline">{t('management.title')}</h1>
         </div>
         <Tabs defaultValue="categories">
             <div className="flex items-center">
             <TabsList>
-                <TabsTrigger value="categories">Categories</TabsTrigger>
-                <TabsTrigger value="tags">Tags</TabsTrigger>
+                <TabsTrigger value="categories">{t('categories')}</TabsTrigger>
+                <TabsTrigger value="tags">{t('tags')}</TabsTrigger>
             </TabsList>
             </div>
             <TabsContent value="categories">
@@ -89,12 +91,12 @@ return (
                 </div>
                 {isLoadingCategories ? <DataTableSkeleton columnCount={3} /> : (
                     (categories && categories.length > 0) ? (
-                        <DataTable columns={categoryColumns(handleEditCategory)} data={categories} />
+                        <DataTable columns={categoryColumns(handleEditCategory, t)} data={categories} />
                     ) : (
                         <EmptyState
                             icon={PlusCircle}
-                            title="No categories created"
-                            description="Get started by creating your first category."
+                            title={t('management.categories.empty.title')}
+                            description={t('management.categories.empty.description')}
                         >
                             <AddItemSheet 
                                 itemType="Category"
@@ -119,12 +121,12 @@ return (
                 </div>
                 {isLoadingTags ? <DataTableSkeleton columnCount={3} /> : (
                     (tags && tags.length > 0) ? (
-                        <DataTable columns={tagColumns(handleEditTag)} data={tags} />
+                        <DataTable columns={tagColumns(handleEditTag, t)} data={tags} />
                     ) : (
                         <EmptyState
                             icon={PlusCircle}
-                            title="No tags created"
-                            description="Get started by creating your first tag."
+                            title={t('management.tags.empty.title')}
+                            description={t('management.tags.empty.description')}
                         >
                             <AddItemSheet
                                 itemType="Tag"

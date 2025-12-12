@@ -11,11 +11,13 @@ import { collection, query, where } from "firebase/firestore";
 import { Transaction } from "@/lib/types";
 import { startOfMonth, format, addMonths } from "date-fns";
 import { MonthlyDebits } from "@/components/dashboard/monthly-debits";
+import { useLanguage } from "@/components/i18n/language-provider";
 
 export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t } = useLanguage();
 
   const transactionsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -40,7 +42,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">{t('dashboard.title')}</h1>
         <MonthYearPicker date={currentDate} setDate={setCurrentDate} />
       </div>
       <OverviewCards transactions={transactions} isLoading={isLoading} />

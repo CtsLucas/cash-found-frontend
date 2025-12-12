@@ -11,6 +11,7 @@ import { doc, getDoc, collection, writeBatch } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { seedCategories, seedTags } from '@/lib/seed-data';
+import { useLanguage } from '@/components/i18n/language-provider';
 
 const seedUserData = async (firestore: any, userId: string) => {
   const batch = writeBatch(firestore);
@@ -39,6 +40,7 @@ export default function LoginPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isUserLoading && user && firestore) {
@@ -72,7 +74,7 @@ export default function LoginPage() {
   if (isUserLoading || user) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p>Loading...</p>
+        <p>{t('loading')}...</p>
       </div>
     );
   }
@@ -84,11 +86,11 @@ export default function LoginPage() {
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold font-headline">CashFound</h1>
             <p className="text-balance text-muted-foreground">
-              Sign in to manage your finances
+              {t('login.subtitle')}
             </p>
           </div>
           <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
-            Login with Google
+            {t('login.with_google')}
           </Button>
         </div>
       </div>

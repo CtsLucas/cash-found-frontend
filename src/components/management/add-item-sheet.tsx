@@ -23,6 +23,7 @@ import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-b
 import { collection, doc } from "firebase/firestore";
 import React from "react";
 import { Category, Tag } from "@/lib/types";
+import { useLanguage } from "../i18n/language-provider";
 
 const itemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -45,6 +46,7 @@ export function AddItemSheet({ itemType, isOpen: controlledIsOpen, onOpenChange:
   const [isInternalOpen, setInternalOpen] = React.useState(false);
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t } = useLanguage();
 
   const isOpen = controlledIsOpen ?? isInternalOpen;
   const setIsOpen = setControlledIsOpen ?? setInternalOpen;
@@ -92,6 +94,8 @@ export function AddItemSheet({ itemType, isOpen: controlledIsOpen, onOpenChange:
     
     setIsOpen(false);
   };
+  
+  const itemTypeT = itemType === 'Category' ? t('category') : t('tag');
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -99,15 +103,15 @@ export function AddItemSheet({ itemType, isOpen: controlledIsOpen, onOpenChange:
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add {itemType}
+            {t('add')} {itemTypeT}
           </span>
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{isEditing ? `Edit ${itemType}` : `Add a new ${itemType}`}</SheetTitle>
+          <SheetTitle>{isEditing ? `${t('edit')} ${itemTypeT}` : `${t('add')} ${itemTypeT}`}</SheetTitle>
           <SheetDescription>
-            {isEditing ? 'Update the details for your item.' : 'Fill in the details below to add a new item.'}
+            {isEditing ? t('management.form.edit_description') : t('management.form.add_description')}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -117,9 +121,9 @@ export function AddItemSheet({ itemType, isOpen: controlledIsOpen, onOpenChange:
                     name="name"
                     render={({ field }) => (
                         <FormItem className="grid grid-cols-4 items-center gap-4">
-                            <FormLabel className="text-right">Name</FormLabel>
+                            <FormLabel className="text-right">{t('name')}</FormLabel>
                             <FormControl>
-                                <Input placeholder={`${itemType} name`} {...field} className="col-span-3" />
+                                <Input placeholder={`${itemTypeT} ${t('name').toLowerCase()}`} {...field} className="col-span-3" />
                             </FormControl>
                             <FormMessage className="col-start-2 col-span-3"/>
                         </FormItem>
@@ -127,9 +131,9 @@ export function AddItemSheet({ itemType, isOpen: controlledIsOpen, onOpenChange:
                 />
                 <SheetFooter>
                     <SheetClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{t('cancel')}</Button>
                     </SheetClose>
-                    <Button type="submit">Save {itemType}</Button>
+                    <Button type="submit">{t('save')} {itemTypeT}</Button>
                 </SheetFooter>
             </form>
         </Form>

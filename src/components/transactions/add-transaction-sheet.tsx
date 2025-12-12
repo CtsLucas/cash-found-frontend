@@ -39,6 +39,7 @@ import { Separator } from "@/components/ui/separator";
 import { add, format } from "date-fns";
 import { CurrencyInput } from "../ui/currency-input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "../i18n/language-provider";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -58,12 +59,17 @@ const transactionSchema = z.object({
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
-const getInvoiceMonths = () => {
+const getInvoiceMonths = (getMonthName: (month: number) => string) => {
     const months = [];
     const today = new Date();
     for (let i = 0; i < 13; i++) { // Current month + next 12 months
         const date = add(today, { months: i });
-        months.push(format(date, 'MMMM yyyy'));
+        const monthName = getMonthName(date.getMonth());
+        const year = date.getFullYear();
+        months.push({
+            value: format(date, 'MMMM yyyy'),
+            label: `${monthName} ${year}`
+        });
     }
     return months;
 }
@@ -78,7 +84,7 @@ interface AddTransactionSheetProps {
 export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: setControlledIsOpen, editingTransaction, children }: AddTransactionSheetProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-
+  const { t, getMonthName } = useLanguage();
   const [isInternalOpen, setInternalOpen] = React.useState(false);
 
   const isOpen = controlledIsOpen ?? isInternalOpen;
@@ -103,8 +109,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   }, [firestore, user]);
   const { data: cards } = useCollection<Card>(cardsQuery);
 
-  const invoiceMonths = React.useMemo(() => getInvoiceMonths(), []);
-  const currentMonth = format(new Date(), 'MMMM yyyy');
+  const invoiceMonths = React.useMemo(() => getInvoiceMonths(getMonthName), [getMonthName]);
+  const currentMonthValue = format(new Date(), 'MMMM yyyy');
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -117,7 +123,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       date: new Date().toISOString().split("T")[0],
       tags: [],
       cardId: "",
-      invoiceMonth: currentMonth,
+      invoiceMonth: currentMonthValue,
       installments: 1,
       userId: user?.uid
     },
@@ -142,27 +148,25 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             date: new Date().toISOString().split("T")[0],
             tags: [] as string[],
             cardId: "",
-            invoiceMonth: currentMonth,
+            invoiceMonth: currentMonthValue,
             installments: 1,
             userId: user.uid
         };
 
         if (editingTransaction) {
-            // The date from firestore is already in 'YYYY-MM-DD' format,
-            // which is exactly what the <input type="date"> needs. No conversion necessary.
             form.reset({
               ...editingTransaction,
               date: editingTransaction.date || '',
               tags: editingTransaction.tags || [],
               cardId: editingTransaction.cardId || "",
-              invoiceMonth: editingTransaction.invoiceMonth || currentMonth,
+              invoiceMonth: editingTransaction.invoiceMonth || currentMonthValue,
               installments: editingTransaction.installments || 1,
             });
         } else {
             form.reset(defaultValues);
         }
     }
-  }, [user, isOpen, editingTransaction, currentMonth, form]);
+  }, [user, isOpen, editingTransaction, currentMonthValue, form]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
@@ -184,8 +188,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     if (isEditing) {
         if(editingTransaction?.id) {
             const transactionRef = doc(firestore, `users/${user.uid}/transactions/${editingTransaction.id}`);
-            // Note: Editing installments is not supported in this flow.
-            // We just update the main transaction.
             setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
         }
     } else if (isCardExpense && installmentCount > 1) {
@@ -194,9 +196,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         
         const installmentAmount = calculatedAmount / installmentCount;
         const startingInvoiceDate = data.invoiceMonth ? new Date(data.invoiceMonth) : new Date();
-        // The date string from the form is 'YYYY-MM-DD'.
-        // Create a date object from it, ensuring it's treated as local time
-        // by splitting and re-assembling to avoid UTC conversion issues.
+
         const dateParts = data.date.split('-').map(p => parseInt(p, 10));
         const originalTransactionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
 
@@ -212,7 +212,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 ...dataToSave,
                 id: newTransactionRef.id,
                 amount: installmentAmount,
-                deduction: 0, // Deduction is applied once to the total amount before splitting
+                deduction: 0,
                 description: data.description,
                 date: format(installmentDate, 'yyyy-MM-dd'),
                 invoiceMonth: format(invoiceDate, 'MMMM yyyy'),
@@ -225,7 +225,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         await batch.commit();
 
     } else {
-      // Create a single new transaction
       const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
       addDocumentNonBlocking(transactionsCollection, dataToSave);
     }
@@ -244,16 +243,16 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 <Button size="sm" className="h-8 gap-1">
                 <PlusCircle className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Transaction
+                    {t('transactions.add_button')}
                 </span>
                 </Button>
             </SheetTrigger>
         )}
       <SheetContent className="sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>{isEditing ? 'Edit transaction' : 'Add a new transaction'}</SheetTitle>
+          <SheetTitle>{isEditing ? t('transactions.edit_title') : t('transactions.add_title')}</SheetTitle>
           <SheetDescription>
-            {isEditing ? 'Update the details of your financial record.' : 'Fill in the details below to add a new financial record.'}
+            {isEditing ? t('transactions.edit_description') : t('transactions.add_description')}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -281,7 +280,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                     field.value === 'expense' && "bg-red-500 text-white border-red-500 hover:bg-red-500/90"
                                                 )}
                                             >
-                                                Expense
+                                                {t('expense')}
                                             </div>
                                         </Label>
                                     </FormItem>
@@ -297,7 +296,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                     field.value === 'income' && "bg-green-500 text-white border-green-500 hover:bg-green-500/90"
                                                 )}
                                             >
-                                                Income
+                                                {t('income')}
                                             </div>
                                         </Label>
                                     </FormItem>
@@ -314,10 +313,10 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                         name="amount"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Amount</FormLabel>
+                                <FormLabel>{t('amount')}</FormLabel>
                                 <FormControl>
                                     <CurrencyInput 
-                                        placeholder="$0.00"
+                                        placeholder="0.00"
                                         value={field.value}
                                         onValueChange={field.onChange}
                                     />
@@ -332,10 +331,10 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                             name="deduction"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Deduction</FormLabel>
+                                    <FormLabel>{t('deduction')}</FormLabel>
                                     <FormControl>
                                     <CurrencyInput 
-                                        placeholder="$0.00"
+                                        placeholder="0.00"
                                         value={field.value}
                                         onValueChange={field.onChange}
                                     />
@@ -349,7 +348,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 
                 {type === 'expense' && (
                     <FormItem>
-                        <FormLabel>Final Amount</FormLabel>
+                        <FormLabel>{t('final_amount')}</FormLabel>
                         <FormControl>
                             <CurrencyInput 
                                 value={calculatedAmount}
@@ -367,9 +366,9 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>{t('description')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g. Groceries" {...field} />
+                                <Input placeholder={t('transactions.form.description.placeholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -380,11 +379,11 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     name="category"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Category</FormLabel>
+                            <FormLabel>{t('category')}</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a category" />
+                                    <SelectValue placeholder={t('transactions.form.category.placeholder')} />
                                 </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -401,7 +400,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     name="tags"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Tags</FormLabel>
+                            <FormLabel>{t('tags')}</FormLabel>
                             <Popover open={openTags} onOpenChange={setOpenTags}>
                                 <PopoverTrigger asChild>
                                     <FormControl>
@@ -418,16 +417,16 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                     const tag = tags?.find(t => t.id === tagId);
                                                     return <Badge variant="secondary" key={tagId}>{tag?.name}</Badge>
                                                 })}
-                                                {field.value?.length === 0 && "Select tags"}
+                                                {field.value?.length === 0 && t('transactions.form.tags.placeholder')}
                                             </div>
                                         </Button>
                                     </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                                     <Command>
-                                        <CommandInput placeholder="Search tags..." />
+                                        <CommandInput placeholder={t('transactions.form.tags.search_placeholder')} />
                                         <CommandList>
-                                            <CommandEmpty>No tags found.</CommandEmpty>
+                                            <CommandEmpty>{t('transactions.form.tags.empty')}</CommandEmpty>
                                             <CommandGroup>
                                                 {tags?.map((tag) => (
                                                     <CommandItem
@@ -462,7 +461,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     name="date"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Date</FormLabel>
+                            <FormLabel>{t('date')}</FormLabel>
                             <FormControl>
                                 <Input type="date" {...field} />
                             </FormControl>
@@ -478,15 +477,15 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                             name="cardId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Card</FormLabel>
+                                    <FormLabel>{t('card')}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select a card" />
+                                            <SelectValue placeholder={t('transactions.form.card.placeholder')} />
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="none">None</SelectItem>
+                                            <SelectItem value="none">{t('none')}</SelectItem>
                                             {cards?.map(card => <SelectItem key={card.id} value={card.id}>{card.cardName} - {card.last4}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -500,7 +499,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                 name="installments"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Installments</FormLabel>
+                                        <FormLabel>{t('installments')}</FormLabel>
                                         <FormControl>
                                             <Input type="number" min="1" placeholder="1" {...field} />
                                         </FormControl>
@@ -515,15 +514,15 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                 name="invoiceMonth"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Invoice Month</FormLabel>
+                                        <FormLabel>{t('invoice_month')}</FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select an invoice month" />
+                                                <SelectValue placeholder={t('transactions.form.invoice_month.placeholder')} />
                                             </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}
+                                                {invoiceMonths.map(month => <SelectItem key={month.value} value={month.value}>{month.label}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -536,9 +535,9 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 
                 <SheetFooter className="pt-4">
                     <SheetClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{t('cancel')}</Button>
                     </SheetClose>
-                    <Button type="submit">Save transaction</Button>
+                    <Button type="submit">{t('save')}</Button>
                 </SheetFooter>
             </form>
         </Form>

@@ -16,18 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase";
 import { Transaction } from "@/lib/types";
 import { collection, limit, orderBy, query } from "firebase/firestore";
 import { Skeleton } from "../ui/skeleton";
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
+import { useLanguage } from "../i18n/language-provider";
 
 const RecentTransactionsSkeleton = () => {
     return (
@@ -62,6 +55,7 @@ const RecentTransactionsSkeleton = () => {
 export function RecentTransactions() {
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t, formatCurrency } = useLanguage();
 
   const recentTransactionsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -74,21 +68,21 @@ export function RecentTransactions() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Recent Transactions</CardTitle>
-        <CardDescription>A quick look at your latest activity.</CardDescription>
+        <CardTitle className="font-headline">{t('dashboard.recent_transactions.title')}</CardTitle>
+        <CardDescription>{t('dashboard.recent_transactions.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? <RecentTransactionsSkeleton /> : (
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead>Description</TableHead>
-                <TableHead className="hidden sm:table-cell">Type</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>{t('description')}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t('type')}</TableHead>
+                <TableHead className="text-right">{t('amount')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {!isLoading && recentTransactions?.length === 0 && <TableRow><TableCell colSpan={3} className="text-center">No recent transactions.</TableCell></TableRow>}
+                {!isLoading && recentTransactions?.length === 0 && <TableRow><TableCell colSpan={3} className="text-center">{t('dashboard.recent_transactions.empty')}</TableCell></TableRow>}
                 {recentTransactions?.map((transaction) => {
                 const amount = transaction.type === 'expense' 
                     ? transaction.amount - (transaction.deduction || 0)
@@ -102,7 +96,7 @@ export function RecentTransactions() {
                         {transaction.category}
                     </div>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell capitalize">{transaction.type}</TableCell>
+                    <TableCell className="hidden sm:table-cell capitalize">{t(transaction.type)}</TableCell>
                     <TableCell className={`text-right ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
                     {transaction.type === 'income' ? '+' : '-'}{formatCurrency(amount)}
                     </TableCell>

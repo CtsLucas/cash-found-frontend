@@ -26,6 +26,7 @@ import { collection, doc } from "firebase/firestore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card as CardType } from "@/lib/types";
 import { CurrencyInput } from "../ui/currency-input";
+import { useLanguage } from "../i18n/language-provider";
   
 const cardSchema = z.object({
     cardName: z.string().min(1, "Card name is required"),
@@ -48,6 +49,7 @@ interface AddCardSheetProps {
 export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setControlledIsOpen, editingCard, children }: AddCardSheetProps) {
   const firestore = useFirestore();
   const { user } = useUser();
+  const { t } = useLanguage();
   const [isInternalOpen, setInternalOpen] = React.useState(false);
 
   const isEditing = !!editingCard;
@@ -111,16 +113,16 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                 <Button size="sm" className="h-8 gap-1">
                 <PlusCircle className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Card
+                    {t('cards.add_button')}
                 </span>
                 </Button>
             </SheetTrigger>
         )}
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>{isEditing ? 'Edit Card' : 'Add a new card'}</SheetTitle>
+          <SheetTitle>{isEditing ? t('cards.edit_title') : t('cards.add_title')}</SheetTitle>
           <SheetDescription>
-            {isEditing ? 'Update the details of your card.' : 'Fill in the details below to add a new card to your wallet.'}
+            {isEditing ? t('cards.edit_description') : t('cards.add_description')}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -130,9 +132,9 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                     name="cardName"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Card Name</FormLabel>
+                            <FormLabel>{t('cards.form.name.label')}</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g. Chase Sapphire" {...field} />
+                                <Input placeholder={t('cards.form.name.placeholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -143,10 +145,10 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                     name="limit"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Credit Limit</FormLabel>
+                            <FormLabel>{t('cards.form.limit.label')}</FormLabel>
                             <FormControl>
                                 <CurrencyInput
-                                    placeholder="$10,000.00"
+                                    placeholder="10,000.00"
                                     value={field.value}
                                     onValueChange={field.onChange}
                                 />
@@ -161,7 +163,7 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                         name="dueDate"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Due Day</FormLabel>
+                                <FormLabel>{t('cards.form.due_day.label')}</FormLabel>
                                 <FormControl>
                                     <Input type="number" min="1" max="31" {...field} />
                                 </FormControl>
@@ -174,7 +176,7 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                         name="last4"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Last 4 digits</FormLabel>
+                                <FormLabel>{t('cards.form.last4.label')}</FormLabel>
                                 <FormControl>
                                     <Input placeholder="1234" {...field} />
                                 </FormControl>
@@ -188,7 +190,7 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                       name="color"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Card Color</FormLabel>
+                          <FormLabel>{t('cards.form.color.label')}</FormLabel>
                           <FormControl>
                             <Input type="color" {...field} className="h-10 p-1 w-full"/>
                           </FormControl>
@@ -199,9 +201,9 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                 
                 <SheetFooter className="pt-4">
                     <SheetClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{t('cancel')}</Button>
                     </SheetClose>
-                    <Button type="submit">Save card</Button>
+                    <Button type="submit">{t('save')}</Button>
                 </SheetFooter>
             </form>
         </Form>
