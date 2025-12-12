@@ -145,6 +145,27 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     },
   },
   {
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => {
+        const dateString = row.getValue("date") as string;
+        const [clientDate, setClientDate] = useState<string | null>(null);
+
+        useEffect(() => {
+          // The date string from the data is 'YYYY-MM-DD'.
+          // We need to parse it correctly to avoid timezone issues.
+          // By splitting the string and creating a date, we treat it as local time.
+          const parts = dateString.split('-').map(part => parseInt(part, 10));
+          const date = new Date(parts[0], parts[1] - 1, parts[2]);
+          setClientDate(date.toLocaleDateString());
+        }, [dateString]);
+        
+        return (
+            <div>{clientDate}</div>
+        )
+    }
+  },
+  {
     accessorKey: "amount",
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
@@ -172,27 +193,6 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         </div>
       )
     },
-  },
-  {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => {
-        const dateString = row.getValue("date") as string;
-        const [clientDate, setClientDate] = useState<string | null>(null);
-
-        useEffect(() => {
-          // The date string from the data is 'YYYY-MM-DD'.
-          // We need to parse it correctly to avoid timezone issues.
-          // By splitting the string and creating a date, we treat it as local time.
-          const parts = dateString.split('-').map(part => parseInt(part, 10));
-          const date = new Date(parts[0], parts[1] - 1, parts[2]);
-          setClientDate(date.toLocaleDateString());
-        }, [dateString]);
-        
-        return (
-            <div>{clientDate}</div>
-        )
-    }
   },
   {
     id: "actions",
