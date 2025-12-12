@@ -28,6 +28,8 @@ import { useFirestore, useUser } from "@/firebase"
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { doc } from "firebase/firestore"
 import { useState } from "react"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -67,7 +69,7 @@ export function DataTableRowActions<TData extends Tag>({
             <DropdownMenuItem onClick={() => onEdit(item)}>Edit</DropdownMenuItem>
             <DropdownMenuSeparator />
             <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>Delete</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>Delete</DropdownMenuItem>
             </AlertDialogTrigger>
         </DropdownMenuContent>
         </DropdownMenu>
@@ -80,7 +82,7 @@ export function DataTableRowActions<TData extends Tag>({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={handleDelete} className={cn(buttonVariants({ variant: "destructive" }))}>Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

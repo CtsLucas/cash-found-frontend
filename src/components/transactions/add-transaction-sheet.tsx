@@ -78,6 +78,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
 
   const isOpen = controlledIsOpen ?? isInternalOpen;
   const setIsOpen = setControlledIsOpen ?? setInternalOpen;
+  const [openTags, setOpenTags] = React.useState(false);
 
   const categoriesQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -213,7 +214,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                         <FormLabel htmlFor="r1">
                                             <div className={cn(
                                                 "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
-                                                field.value === 'expense' && "border-primary"
+                                                field.value === 'expense' && "border-destructive"
                                             )}>
                                                 Expense
                                             </div>
@@ -268,7 +269,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     )}
                 </div>
                 
-                <div className="text-right text-lg font-bold">
+                <div className={cn("text-right text-lg font-bold", type === 'expense' && "text-destructive")}>
                     Final Amount: ${Number(calculatedAmount).toFixed(2)}
                 </div>
                 
@@ -314,7 +315,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tags</FormLabel>
-                            <Popover>
+                            <Popover open={openTags} onOpenChange={setOpenTags}>
                                 <PopoverTrigger asChild>
                                     <FormControl>
                                         <Button
@@ -344,15 +345,20 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                 {tags?.map((tag) => (
                                                     <CommandItem
                                                         key={tag.id}
-                                                        value={tag.id}
+                                                        value={tag.name}
                                                         onSelect={(currentValue) => {
-                                                            const selectedTags = field.value || [];
-                                                            const isSelected = selectedTags.includes(currentValue);
-                                                            if (isSelected) {
-                                                                field.onChange(selectedTags.filter(id => id !== currentValue));
-                                                            } else {
-                                                                field.onChange([...selectedTags, currentValue]);
-                                                            }
+                                                          const tagId = tags.find(t => t.name.toLowerCase() === currentValue.toLowerCase())?.id;
+                                                          if (!tagId) return;
+
+                                                          const selectedTags = field.value || [];
+                                                          const isSelected = selectedTags.includes(tagId);
+                                                          
+                                                          if (isSelected) {
+                                                              field.onChange(selectedTags.filter(id => id !== tagId));
+                                                          } else {
+                                                              field.onChange([...selectedTags, tagId]);
+                                                          }
+                                                          // setOpenTags(false);
                                                         }}
                                                     >
                                                         {tag.name}
