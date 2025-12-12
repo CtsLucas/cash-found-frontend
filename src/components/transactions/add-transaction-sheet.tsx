@@ -100,7 +100,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   }, [firestore, user]);
   const { data: cards } = useCollection<Card>(cardsQuery);
 
-  const invoiceMonths = getInvoiceMonths();
+  const invoiceMonths = React.useMemo(() => getInvoiceMonths(), []);
+  const currentMonth = invoiceMonths[0];
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -112,7 +113,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       category: "",
       date: new Date().toISOString().split("T")[0],
       tags: [],
-      invoiceMonth: invoiceMonths[0],
+      invoiceMonth: currentMonth,
       installments: 1,
       userId: user?.uid
     },
@@ -137,7 +138,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             date: new Date().toISOString().split("T")[0],
             tags: [] as string[],
             cardId: "",
-            invoiceMonth: invoiceMonths[0],
+            invoiceMonth: currentMonth,
             installments: 1,
             userId: user.uid
         };
@@ -148,14 +149,14 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
               date: editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : '',
               tags: editingTransaction.tags || [],
               cardId: editingTransaction.cardId || "",
-              invoiceMonth: editingTransaction.invoiceMonth || invoiceMonths[0],
+              invoiceMonth: editingTransaction.invoiceMonth || currentMonth,
               installments: editingTransaction.installments || 1,
             });
         } else {
             form.reset(defaultValues);
         }
     }
-  }, [user, form, isOpen, editingTransaction, invoiceMonths]);
+  }, [user, isOpen, editingTransaction, currentMonth]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
@@ -397,7 +398,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                           } else {
                                                               field.onChange([...selectedTags, tagId]);
                                                           }
-                                                          setOpenTags(true);
                                                         }}
                                                     >
                                                         {tag.name}
@@ -465,26 +465,28 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                 )}
                             />
                         )}
-                        <FormField
-                            control={form.control}
-                            name="invoiceMonth"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Invoice Month</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select an invoice month" />
-                                        </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        {isCardExpense && (
+                            <FormField
+                                control={form.control}
+                                name="invoiceMonth"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Invoice Month</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an invoice month" />
+                                            </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
                     </>
                 )}
                 
@@ -500,7 +502,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
-
-
-
-
