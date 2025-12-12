@@ -7,7 +7,7 @@ import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebas
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
 import { Pencil } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AddCardSheet } from "@/components/cards/add-card-sheet";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
@@ -47,11 +47,17 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
         return Object.keys(invoices).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
     }, [invoices]);
 
-    useMemo(() => {
+    useEffect(() => {
         if (sortedInvoiceMonths.length > 0 && !selectedInvoice) {
             setSelectedInvoice(sortedInvoiceMonths[0]);
         }
-    }, [sortedInvoiceMonths, selectedInvoice]);
+        if (carouselApi) {
+            const selectedIndex = sortedInvoiceMonths.findIndex(m => m === selectedInvoice);
+            if (selectedIndex !== -1 && selectedIndex !== carouselApi.selectedScrollSnap()) {
+                carouselApi.scrollTo(selectedIndex);
+            }
+        }
+    }, [sortedInvoiceMonths, selectedInvoice, carouselApi]);
 
     const handleInvoiceSelect = (month: string) => {
         const index = sortedInvoiceMonths.findIndex(m => m === month);
@@ -75,7 +81,7 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
                     const invoice = invoices[month];
                     const isSelected = selectedInvoice === month;
                     return (
-                        <CarouselItem key={month} className="md:basis-1/2 lg:basis-1/3">
+                        <CarouselItem key={month} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                             <div className="p-1">
                                 <UICard 
                                     className={cn("cursor-pointer", isSelected && "border-primary")}
