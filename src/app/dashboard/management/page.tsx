@@ -8,13 +8,31 @@ import {
     TabsTrigger,
   } from "@/components/ui/tabs"
 import { DataTable } from "@/components/transactions/data-table"
-import { categories, tags } from "@/lib/data"
 import { categoryColumns } from "@/components/management/categories/columns"
 import { tagColumns } from "@/components/management/tags/columns"
 import { AddItemSheet } from "@/components/management/add-item-sheet"
 import { ClientOnly } from "@/components/client-only"
+import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
+import { Category, Tag } from "@/lib/types"
+import { collection } from "firebase/firestore"
   
 export default function ManagementPage() {
+    const firestore = useFirestore();
+    const { user } = useUser();
+
+    const categoriesQuery = useMemoFirebase(() => {
+        if (!user) return null;
+        return collection(firestore, `users/${user.uid}/categories`);
+    }, [firestore, user]);
+    const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
+
+    const tagsQuery = useMemoFirebase(() => {
+        if (!user) return null;
+        return collection(firestore, `users/${user.uid}/tags`);
+    }, [firestore, user]);
+    const { data: tags, isLoading: isLoadingTags } = useCollection<Tag>(tagsQuery);
+
+
 return (
     <>
         <div className="flex items-center">
@@ -32,12 +50,12 @@ return (
             </div>
             <TabsContent value="categories">
               <ClientOnly>
-                <DataTable columns={categoryColumns} data={categories} />
+                {isLoadingCategories ? <p>Loading...</p> : <DataTable columns={categoryColumns} data={categories || []} />}
               </ClientOnly>
             </TabsContent>
             <TabsContent value="tags">
               <ClientOnly>
-                <DataTable columns={tagColumns} data={tags} />
+                {isLoadingTags ? <p>Loading...</p> : <DataTable columns={tagColumns} data={tags || []} />}
               </ClientOnly>
             </TabsContent>
         </Tabs>

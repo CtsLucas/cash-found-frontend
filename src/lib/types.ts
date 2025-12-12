@@ -1,3 +1,4 @@
+
 export type Transaction = {
   id: string;
   date: string;
@@ -5,19 +6,22 @@ export type Transaction = {
   amount: number;
   deduction?: number;
   type: 'income' | 'expense';
-  category: string; // Changed to string to be more flexible
+  category: string; 
   tags?: string[];
+  userId?: string;
 };
 
 export type Category = {
   id: string;
   name: string;
   type: 'income' | 'expense' | 'all';
+  userId?: string;
 };
 
 export type Tag = {
   id: string;
   name: string;
+  userId?: string;
 }
 
 export type Card = {
@@ -27,6 +31,7 @@ export type Card = {
   limit: number;
   dueDate: string;
   closingDate: string;
+  userId?: string;
 };
 
 export type Invoice = {
@@ -35,4 +40,5 @@ export type Invoice = {
   month: string;
   total: number;
   status: 'paid' | 'unpaid';
+  userId?: string;
 };

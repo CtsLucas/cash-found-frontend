@@ -1,3 +1,6 @@
+
+'use client'
+
 import {
   Card,
   CardContent,
@@ -14,7 +17,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { transactions } from "@/lib/data";
+import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase";
+import { Transaction } from "@/lib/types";
+import { collection, limit, orderBy, query } from "firebase/firestore";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -24,7 +29,16 @@ const formatCurrency = (amount: number) => {
   };
 
 export function RecentTransactions() {
-  const recentTransactions = transactions.slice(0, 5);
+  const firestore = useFirestore();
+  const { user } = useUser();
+
+  const recentTransactionsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(firestore, `users/${user.uid}/transactions`), orderBy('date', 'desc'), limit(5));
+  }, [firestore, user]);
+
+  const { data: recentTransactions, isLoading } = useCollection<Transaction>(recentTransactionsQuery);
+
 
   return (
     <Card>
@@ -42,7 +56,9 @@ export function RecentTransactions() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentTransactions.map((transaction) => {
+            {isLoading && <TableRow><TableCell colSpan={3} className="text-center">Loading...</TableCell></TableRow>}
+            {!isLoading && recentTransactions?.length === 0 && <TableRow><TableCell colSpan={3} className="text-center">No recent transactions.</TableCell></TableRow>}
+            {recentTransactions?.map((transaction) => {
               const amount = transaction.type === 'expense' 
                 ? transaction.amount - (transaction.deduction || 0)
                 : transaction.amount;
