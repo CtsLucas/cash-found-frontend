@@ -222,7 +222,7 @@ export function AddTransactionSheet() {
                 </div>
                 
                 <div className="text-right text-lg font-bold">
-                    Final Amount: ${calculatedAmount.toFixed(2)}
+                    Final Amount: ${Number(calculatedAmount).toFixed(2)}
                 </div>
                 
                 <Separator />
@@ -365,7 +365,7 @@ export function AddTransactionSheet() {
                                         <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select an invoice month" />
-                                        </Trigger>
+                                        </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
                                             {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}
