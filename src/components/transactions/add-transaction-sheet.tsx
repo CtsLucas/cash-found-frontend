@@ -100,6 +100,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   }, [firestore, user]);
   const { data: cards } = useCollection<Card>(cardsQuery);
 
+  const invoiceMonths = getInvoiceMonths();
+
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -110,6 +112,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       category: "",
       date: new Date().toISOString().split("T")[0],
       tags: [],
+      invoiceMonth: invoiceMonths[0],
       installments: 1,
       userId: user?.uid
     },
@@ -134,7 +137,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             date: new Date().toISOString().split("T")[0],
             tags: [] as string[],
             cardId: "",
-            invoiceMonth: "",
+            invoiceMonth: invoiceMonths[0],
             installments: 1,
             userId: user.uid
         };
@@ -145,14 +148,14 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
               date: editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : '',
               tags: editingTransaction.tags || [],
               cardId: editingTransaction.cardId || "",
-              invoiceMonth: editingTransaction.invoiceMonth || "",
+              invoiceMonth: editingTransaction.invoiceMonth || invoiceMonths[0],
               installments: editingTransaction.installments || 1,
             });
         } else {
             form.reset(defaultValues);
         }
     }
-  }, [user, form, isOpen, editingTransaction]);
+  }, [user, form, isOpen, editingTransaction, invoiceMonths]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
@@ -209,7 +212,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     setIsOpen(false);
   };
 
-  const invoiceMonths = getInvoiceMonths();
   const isEditing = !!editingTransaction;
 
   return (
@@ -395,6 +397,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                           } else {
                                                               field.onChange([...selectedTags, tagId]);
                                                           }
+                                                          setOpenTags(true);
                                                         }}
                                                     >
                                                         {tag.name}
@@ -497,6 +500,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
 
 
 
