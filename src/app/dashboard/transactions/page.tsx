@@ -21,6 +21,8 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebas
 import { collection, query, where } from "firebase/firestore"
 import { useMemo, useState } from "react"
 import { Transaction } from "@/lib/types"
+import { MonthYearPicker } from "@/components/transactions/month-year-picker"
+import { startOfMonth, endOfMonth, format } from "date-fns"
   
   export default function TransactionsPage() {
     const firestore = useFirestore();
@@ -28,16 +30,28 @@ import { Transaction } from "@/lib/types"
     const [filter, setFilter] = useState('all');
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
 
     const transactionsQuery = useMemoFirebase(() => {
         if (!user) return null;
-        let q = collection(firestore, `users/${user.uid}/transactions`);
+
+        const start = startOfMonth(currentDate);
+        const end = endOfMonth(currentDate);
+        
+        const startDate = format(start, 'yyyy-MM-dd');
+        const endDate = format(end, 'yyyy-MM-dd');
+
+        let q = query(
+          collection(firestore, `users/${user.uid}/transactions`),
+          where('date', '>=', startDate),
+          where('date', '<=', endDate)
+        );
 
         if (filter !== 'all') {
             return query(q, where('type', '==', filter));
         }
         return q;
-    }, [firestore, user, filter]);
+    }, [firestore, user, filter, currentDate]);
 
     const { data: transactions, isLoading } = useCollection<Transaction>(transactionsQuery);
 
@@ -79,6 +93,9 @@ import { Transaction } from "@/lib/types"
                   </Button>
                   <AddTransactionSheet isOpen={isSheetOpen} onOpenChange={handleSheetOpenChange} editingTransaction={editingTransaction} />
                 </div>
+              </div>
+              <div className="py-4">
+                <MonthYearPicker date={currentDate} setDate={setCurrentDate} />
               </div>
               <TabsContent value="all">
                 <ClientOnly>
