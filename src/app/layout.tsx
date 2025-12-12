@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'FinanceFlow',
+  title: 'CashFound',
   description: 'Manage your finances with ease.',
 };
 
@@ -29,5 +29,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

@@ -30,29 +30,32 @@ export function MainNav({ isCollapsed }: { isCollapsed: boolean }) {
 
   return (
     <nav className="flex flex-col items-center gap-2 px-2 sm:py-5">
-      {navItems.map((item) => (
-        <Tooltip key={item.href} delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Link
-              href={item.href}
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
-                pathname.startsWith(item.href) && (item.href !== "/dashboard" || pathname === "/dashboard") && "bg-accent text-accent-foreground",
-                isCollapsed && "h-9 w-9",
-                !isCollapsed && "w-full justify-start px-3"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className={cn("sr-only", !isCollapsed && "not-sr-only ml-3")}>
-                {item.label}
-              </span>
-            </Link>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">{item.label}</TooltipContent>
-          )}
-        </Tooltip>
-      ))}
+      {navItems.map((item) => {
+        const isActive = pathname.startsWith(item.href) && (item.href !== "/dashboard" || pathname === "/dashboard");
+        return (
+            <Tooltip key={item.href} delayDuration={0}>
+            <TooltipTrigger asChild>
+                <Link
+                href={item.href}
+                className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
+                    isActive && "bg-primary/10 text-primary",
+                    isCollapsed && "h-9 w-9",
+                    !isCollapsed && "w-full justify-start px-3"
+                )}
+                >
+                <item.icon className="h-5 w-5" />
+                <span className={cn("sr-only", !isCollapsed && "not-sr-only ml-3")}>
+                    {item.label}
+                </span>
+                </Link>
+            </TooltipTrigger>
+            {isCollapsed && (
+                <TooltipContent side="right">{item.label}</TooltipContent>
+            )}
+            </Tooltip>
+        )
+      })}
     </nav>
   );
 }

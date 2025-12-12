@@ -82,7 +82,7 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold font-headline">FinanceFlow</h1>
+            <h1 className="text-3xl font-bold font-headline">CashFound</h1>
             <p className="text-balance text-muted-foreground">
               Sign in to manage your finances
             </p>
