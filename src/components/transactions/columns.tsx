@@ -196,6 +196,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]
