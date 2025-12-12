@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
-import { Wifi, Nfc, Pencil } from "lucide-react";
+import { Nfc, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -160,7 +160,6 @@ export default function CardsPage() {
                         >
                             <header className="flex justify-between items-start">
                                 <span className="text-lg font-semibold tracking-wider">{card.cardName}</span>
-                                <Wifi size={20} className="opacity-80"/>
                             </header>
                             
                             <div className="flex items-center gap-3">
@@ -174,7 +173,7 @@ export default function CardsPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="absolute top-2 right-2 h-7 w-7 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-2 right-2 h-7 w-7 text-white"
                                   onClick={(e) => { e.stopPropagation(); handleEditCard(card); }}
                                 >
                                   <Pencil size={16} />
