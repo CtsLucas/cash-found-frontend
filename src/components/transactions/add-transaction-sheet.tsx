@@ -226,11 +226,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
 
   const isEditing = !!editingTransaction;
 
-  const handleCurrencyChange = (field: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, '');
-    field.onChange(Number(value) / 100);
-  }
-
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
         {children ? (
@@ -304,8 +299,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                 <FormControl>
                                     <CurrencyInput 
                                         placeholder="$0.00"
-                                        {...field}
-                                        onChange={handleCurrencyChange(field)}
+                                        value={field.value}
+                                        onValueChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -322,8 +317,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                     <FormControl>
                                     <CurrencyInput 
                                         placeholder="$0.00"
-                                        {...field}
-                                        onChange={handleCurrencyChange(field)}
+                                        value={field.value}
+                                        onValueChange={field.onChange}
                                     />
                                     </FormControl>
                                     <FormMessage />
@@ -497,7 +492,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                             <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select an invoice month" />
-                                            </SelectTrigger>
+                                            </Trigger>
                                             </FormControl>
                                             <SelectContent>
                                                 {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}

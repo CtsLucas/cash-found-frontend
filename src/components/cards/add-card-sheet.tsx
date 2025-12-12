@@ -101,11 +101,6 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
     setIsOpen(false);
   };
 
-  const handleCurrencyChange = (field: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, '');
-    field.onChange(Number(value) / 100);
-  }
-
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
         {children ? (
@@ -151,8 +146,8 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                             <FormControl>
                                 <CurrencyInput
                                     placeholder="$10,000.00"
-                                    {...field}
-                                    onChange={handleCurrencyChange(field)}
+                                    value={field.value}
+                                    onValueChange={field.onChange}
                                 />
                             </FormControl>
                             <FormMessage />
