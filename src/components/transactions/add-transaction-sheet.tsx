@@ -119,13 +119,13 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   React.useEffect(() => {
     if (user) {
         const defaultValues = {
-            type: "expense",
+            type: "expense" as const,
             amount: 0,
             deduction: 0,
             description: "",
             category: "",
             date: new Date().toISOString().split("T")[0],
-            tags: [],
+            tags: [] as string[],
             cardId: "",
             invoiceMonth: "",
             userId: user.uid
@@ -134,6 +134,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         if (editingTransaction) {
             form.reset({
               ...editingTransaction,
+              date: editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : '',
               tags: editingTransaction.tags || [],
             });
         } else {
@@ -150,6 +151,10 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       delete dataToSave.cardId;
       delete dataToSave.invoiceMonth;
       delete dataToSave.deduction;
+    }
+    
+    if (data.cardId === 'none') {
+        dataToSave.cardId = '';
     }
 
     if (editingTransaction?.id) {
@@ -387,7 +392,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                         </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="">None</SelectItem>
+                                            <SelectItem value="none">None</SelectItem>
                                             {cards?.map(card => <SelectItem key={card.id} value={card.id}>{card.cardName} - {card.last4}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -430,3 +435,4 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+ 
