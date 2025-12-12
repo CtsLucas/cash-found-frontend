@@ -9,6 +9,8 @@ export type Transaction = {
   category: string; 
   tags?: string[];
   userId?: string;
+  cardId?: string;
+  invoiceMonth?: string;
 };
 
 export type Category = {
@@ -42,3 +44,5 @@ export type Invoice = {
   status: 'paid' | 'unpaid';
   userId?: string;
 };
+
+    
