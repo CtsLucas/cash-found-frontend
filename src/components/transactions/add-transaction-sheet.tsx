@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlusCircle } from "lucide-react";
+import { Check, ChevronsUpDown, PlusCircle, X } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -89,7 +89,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
 
   const isOpen = controlledIsOpen ?? isInternalOpen;
   const setIsOpen = setControlledIsOpen ?? setInternalOpen;
-  const [openTags, setOpenTags] = React.useState(false);
 
   const categoriesQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -101,7 +100,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     if (!user) return null;
     return collection(firestore, `users/${user.uid}/tags`);
   }, [firestore, user]);
-  const { data: tags } = useCollection<Tag>(tagsQuery);
+  const { data: allTags } = useCollection<Tag>(tagsQuery);
   
   const cardsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -398,63 +397,88 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 <FormField
                     control={form.control}
                     name="tags"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{t('tags')}</FormLabel>
-                            <Popover open={openTags} onOpenChange={setOpenTags}>
-                                <PopoverTrigger asChild>
-                                    <FormControl>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            className={cn(
-                                                "w-full justify-between h-auto",
-                                                !field.value?.length && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <div className="flex gap-1 flex-wrap">
-                                                {field.value?.map((tagId) => {
-                                                    const tag = tags?.find(t => t.id === tagId);
-                                                    return <Badge variant="secondary" key={tagId}>{tag?.name}</Badge>
-                                                })}
-                                                {field.value?.length === 0 && t('transactions.form.tags.placeholder')}
-                                            </div>
-                                        </Button>
-                                    </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                    <Command>
-                                        <CommandInput placeholder={t('transactions.form.tags.search_placeholder')} />
-                                        <CommandList>
-                                            <CommandEmpty>{t('transactions.form.tags.empty')}</CommandEmpty>
-                                            <CommandGroup>
-                                                {tags?.map((tag) => (
-                                                    <CommandItem
-                                                        key={tag.id}
-                                                        value={tag.id}
-                                                        onSelect={(currentValue) => {
-                                                            const selectedTags = field.value || [];
-                                                            const isSelected = selectedTags.includes(currentValue);
-                                                            if (isSelected) {
-                                                                field.onChange(selectedTags.filter(id => id !== currentValue));
-                                                            } else {
-                                                                field.onChange([...selectedTags, currentValue]);
-                                                            }
-                                                            setOpenTags(true);
-                                                        }}
-                                                    >
-                                                        {tag.name}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                    render={({ field }) => {
+                        const selectedTags = field.value || [];
+                        const handleTagSelect = (tagId: string) => {
+                            const isSelected = selectedTags.includes(tagId);
+                            const newTags = isSelected
+                                ? selectedTags.filter(id => id !== tagId)
+                                : [...selectedTags, tagId];
+                            field.onChange(newTags);
+                        }
+                        const handleTagRemove = (tagId: string) => {
+                            field.onChange(selectedTags.filter(id => id !== tagId));
+                        }
+                        return (
+                            <FormItem>
+                                <FormLabel>{t('tags')}</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                className={cn(
+                                                    "w-full h-auto justify-between",
+                                                    !selectedTags.length && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <div className="flex gap-1 flex-wrap">
+                                                    {selectedTags.map((tagId) => {
+                                                        const tag = allTags?.find(t => t.id === tagId);
+                                                        return tag ? (
+                                                            <Badge
+                                                                variant="secondary"
+                                                                key={tagId}
+                                                                className="mr-1"
+                                                                onClick={(e) => { e.stopPropagation(); handleTagRemove(tagId); }}
+                                                            >
+                                                                {tag.name}
+                                                                <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                                                >
+                                                                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                                                </span>
+                                                            </Badge>
+                                                        ) : null;
+                                                    })}
+                                                    {selectedTags.length === 0 && t('transactions.form.tags.placeholder')}
+                                                </div>
+                                                <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput placeholder={t('transactions.form.tags.search_placeholder')} />
+                                            <CommandList>
+                                                <CommandEmpty>{t('transactions.form.tags.empty')}</CommandEmpty>
+                                                <CommandGroup>
+                                                    {allTags?.map((tag) => (
+                                                        <CommandItem
+                                                            key={tag.id}
+                                                            value={tag.name}
+                                                            onSelect={() => handleTagSelect(tag.id)}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    selectedTags.includes(tag.id) ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {tag.name}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        );
+                    }}
                 />
+
 
                 <FormField
                     control={form.control}
