@@ -31,15 +31,13 @@ import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-b
 import { collection, doc, writeBatch } from "firebase/firestore";
 import { Category, Transaction, Tag, Card } from "@/lib/types";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { add, format } from "date-fns";
 import { CurrencyInput } from "../ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "../i18n/language-provider";
+import { MultiSelect } from "../ui/multi-select";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -232,6 +230,10 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   };
 
   const isEditing = !!editingTransaction;
+  
+  const tagOptions = React.useMemo(() => {
+    return allTags?.map(tag => ({ value: tag.id, label: tag.name })) || [];
+  }, [allTags]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -400,78 +402,16 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('tags')}</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <FormControl>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            className={cn(
-                                                "w-full h-auto justify-between",
-                                                !field.value?.length && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <div className="flex gap-1 flex-wrap">
-                                                {field.value?.map((tagId) => {
-                                                    const tag = allTags?.find(t => t.id === tagId);
-                                                    return tag ? (
-                                                        <Badge
-                                                            variant="secondary"
-                                                            key={tag.id}
-                                                            className="mr-1"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                const newValue = field.value?.filter((id) => id !== tagId);
-                                                                field.onChange(newValue);
-                                                            }}
-                                                        >
-                                                            {tag.name}
-                                                            <X className="ml-1 h-3 w-3 text-muted-foreground hover:text-foreground" />
-                                                        </Badge>
-                                                    ) : null;
-                                                })}
-                                                {field.value?.length === 0 && t('transactions.form.tags.placeholder')}
-                                            </div>
-                                            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                    <Command>
-                                        <CommandInput placeholder={t('transactions.form.tags.search_placeholder')} />
-                                        <CommandList>
-                                            <CommandEmpty>{t('transactions.form.tags.empty')}</CommandEmpty>
-                                            <CommandGroup>
-                                                {allTags?.map((tag) => {
-                                                    const isSelected = field.value?.includes(tag.id) || false;
-                                                    return (
-                                                        <CommandItem
-                                                            key={tag.id}
-                                                            value={tag.name}
-                                                            onSelect={() => {
-                                                                if (isSelected) {
-                                                                    field.onChange(field.value?.filter((id) => id !== tag.id));
-                                                                } else {
-                                                                    field.onChange([...(field.value || []), tag.id]);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Check
-                                                                className={cn(
-                                                                    "mr-2 h-4 w-4",
-                                                                    isSelected ? "opacity-100" : "opacity-0"
-                                                                )}
-                                                            />
-                                                            {tag.name}
-                                                        </CommandItem>
-                                                    )
-                                                })}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
+                            <FormControl>
+                                <MultiSelect
+                                    options={tagOptions}
+                                    selected={field.value || []}
+                                    onChange={field.onChange}
+                                    placeholder={t('transactions.form.tags.placeholder')}
+                                    searchPlaceholder={t('transactions.form.tags.search_placeholder')}
+                                    emptyPlaceholder={t('transactions.form.tags.empty')}
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -567,6 +507,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
-
-
-    
