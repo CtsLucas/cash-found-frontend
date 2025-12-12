@@ -81,7 +81,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         const { tags } = (table.options.meta as { tags: Tag[] })
         
         if (!tagIds || tagIds.length === 0) {
-            return null;
+            return <div className="text-muted-foreground">-</div>;
         }
 
         const tagNames = tagIds.map(tagId => {
@@ -106,7 +106,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         const { cards } = (table.options.meta as { cards: Card[] })
         
         if (!cardId) {
-            return null;
+            return <div className="text-muted-foreground">-</div>;
         }
 
         const card = cards?.find(c => c.id === cardId);
@@ -115,7 +115,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
             <Badge style={{ backgroundColor: card.color }} className="text-white">
                 {card.cardName}
             </Badge>
-        ) : null;
+        ) : <div className="text-muted-foreground">-</div>;
     }
   },
   {
@@ -145,26 +145,6 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     },
   },
   {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => {
-        const dateString = row.getValue("date") as string;
-        const [clientDate, setClientDate] = useState<string | null>(null);
-
-        useEffect(() => {
-          // The date string from the data is 'YYYY-MM-DD'.
-          // To avoid timezone issues where this might be interpreted as the previous day,
-          // we explicitly tell JavaScript to treat it as UTC.
-          const date = new Date(`${dateString}T00:00:00Z`);
-          setClientDate(date.toLocaleDateString(undefined, { timeZone: 'UTC' }));
-        }, [dateString]);
-        
-        return (
-            <div>{clientDate}</div>
-        )
-    }
-  },
-  {
     accessorKey: "amount",
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
@@ -192,6 +172,26 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         </div>
       )
     },
+  },
+  {
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => {
+        const dateString = row.getValue("date") as string;
+        const [clientDate, setClientDate] = useState<string | null>(null);
+
+        useEffect(() => {
+          // The date string from the data is 'YYYY-MM-DD'.
+          // To avoid timezone issues where this might be interpreted as the previous day,
+          // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
+          const date = new Date(`${dateString}T00:00:00Z`);
+          setClientDate(date.toLocaleDateString(undefined, { timeZone: 'UTC' }));
+        }, [dateString]);
+        
+        return (
+            <div>{clientDate}</div>
+        )
+    }
   },
   {
     id: "actions",
