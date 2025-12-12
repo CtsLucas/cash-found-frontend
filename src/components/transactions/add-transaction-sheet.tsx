@@ -29,7 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useFirestore, useUser, useCollection, useMemoFirebase } from "@/firebase";
 import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { collection, doc } from "firebase/firestore";
+import { collection, doc, writeBatch } from "firebase/firestore";
 import { Category, Transaction, Tag, Card } from "@/lib/types";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { add } from "date-fns";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -48,6 +49,7 @@ const transactionSchema = z.object({
     tags: z.array(z.string()).optional(),
     cardId: z.string().optional(),
     invoiceMonth: z.string().optional(),
+    installments: z.coerce.number().min(1).optional(),
     userId: z.string()
 });
 
@@ -108,6 +110,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       category: "",
       date: new Date().toISOString().split("T")[0],
       tags: [],
+      installments: 1,
       userId: user?.uid
     },
   });
@@ -115,6 +118,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   const type = form.watch("type");
   const amount = form.watch("amount");
   const deduction = form.watch("deduction");
+  const cardId = form.watch("cardId");
+  const isCardExpense = type === 'expense' && cardId && cardId !== 'none';
 
   const calculatedAmount = type === 'expense' ? (Number(amount) || 0) - (Number(deduction) || 0) : (Number(amount) || 0);
 
@@ -130,6 +135,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             tags: [] as string[],
             cardId: "",
             invoiceMonth: "",
+            installments: 1,
             userId: user.uid
         };
 
@@ -139,7 +145,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
               date: editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : '',
               tags: editingTransaction.tags || [],
               cardId: editingTransaction.cardId || "",
-              invoiceMonth: editingTransaction.invoiceMonth || ""
+              invoiceMonth: editingTransaction.invoiceMonth || "",
+              installments: editingTransaction.installments || 1,
             });
         } else {
             form.reset(defaultValues);
@@ -147,26 +154,56 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     }
   }, [user, form, isOpen, editingTransaction]);
 
-  const onSubmit = (data: TransactionFormValues) => {
-    if (!user) return;
-    
-    const dataToSave: Partial<TransactionFormValues> = { ...data };
-    if(data.type === 'income') {
+  const onSubmit = async (data: TransactionFormValues) => {
+    if (!user || !firestore) return;
+  
+    const dataToSave: Partial<Transaction> = { ...data };
+    if (data.type === 'income') {
       delete dataToSave.cardId;
       delete dataToSave.invoiceMonth;
       delete dataToSave.deduction;
+      delete dataToSave.installments;
     }
-    
+  
     if (data.cardId === 'none') {
-        dataToSave.cardId = '';
+      dataToSave.cardId = '';
     }
 
-    if (editingTransaction?.id) {
-        const transactionRef = doc(firestore, `users/${user.uid}/transactions/${editingTransaction.id}`);
-        setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
+    if (isEditing) {
+        if(editingTransaction?.id) {
+            const transactionRef = doc(firestore, `users/${user.uid}/transactions/${editingTransaction.id}`);
+            // Note: Editing installments is not supported in this flow.
+            // We just update the main transaction.
+            setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
+        }
     } else {
-        const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
-        addDocumentNonBlocking(transactionsCollection, dataToSave);
+      // Create new transaction
+      const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
+      const newTransactionRef = doc(transactionsCollection); // Create a new doc ref to get the ID
+      
+      await addDocumentNonBlocking(transactionsCollection, { ...dataToSave, id: newTransactionRef.id });
+
+      // Handle installments
+      const installmentCount = data.installments || 1;
+      if (isCardExpense && installmentCount > 1) {
+        const installmentAmount = calculatedAmount / installmentCount;
+        const batch = writeBatch(firestore);
+        const transactionDate = new Date(data.date);
+
+        for (let i = 0; i < installmentCount; i++) {
+          const installmentDate = add(transactionDate, { months: i });
+          const installmentDocRef = doc(collection(firestore, `users/${user.uid}/transactions/${newTransactionRef.id}/installments`));
+          
+          batch.set(installmentDocRef, {
+            id: installmentDocRef.id,
+            transactionId: newTransactionRef.id,
+            dueDate: installmentDate.toISOString(),
+            amount: installmentAmount,
+            isPaid: false,
+          });
+        }
+        await batch.commit();
+      }
     }
     
     setIsOpen(false);
@@ -358,7 +395,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                           } else {
                                                               field.onChange([...selectedTags, tagId]);
                                                           }
-                                                          // setOpenTags(false);
                                                         }}
                                                     >
                                                         {tag.name}
@@ -411,6 +447,21 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                 </FormItem>
                             )}
                         />
+                         {isCardExpense && !isEditing && (
+                            <FormField
+                                control={form.control}
+                                name="installments"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Installments</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" min="1" placeholder="1" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
                         <FormField
                             control={form.control}
                             name="invoiceMonth"
@@ -446,5 +497,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
 
 

@@ -12,6 +12,7 @@ export type Transaction = {
   userId?: string;
   cardId?: string;
   invoiceMonth?: string;
+  installments?: number;
 };
 
 export type Category = {
@@ -46,4 +47,11 @@ export type Invoice = {
   userId?: string;
 };
 
+export type Installment = {
+    id: string;
+    transactionId: string;
+    dueDate: string;
+    amount: number;
+    isPaid: boolean;
+};
     
