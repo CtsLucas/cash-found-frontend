@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Transaction } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
+import { useState, useEffect } from "react"
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -80,29 +81,21 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Date",
     cell: ({ row }) => {
         const dateString = row.getValue("date") as string;
-        // The date string from the data is 'YYYY-MM-DD'.
-        // We need to parse it correctly to avoid timezone issues.
-        // By splitting the string and creating a date, we treat it as local time.
-        const parts = dateString.split('-').map(part => parseInt(part, 10));
-        const date = new Date(parts[0], parts[1] - 1, parts[2]);
-        const formattedDate = date.toLocaleDateString()
+        const [clientDate, setClientDate] = useState<string | null>(null);
+
+        useEffect(() => {
+          // The date string from the data is 'YYYY-MM-DD'.
+          // We need to parse it correctly to avoid timezone issues.
+          // By splitting the string and creating a date, we treat it as local time.
+          const parts = dateString.split('-').map(part => parseInt(part, 10));
+          const date = new Date(parts[0], parts[1] - 1, parts[2]);
+          setClientDate(date.toLocaleDateString());
+        }, [dateString]);
+        
         return (
-            <div>{formattedDate}</div>
+            <div>{clientDate}</div>
         )
     }
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-        const status = row.getValue("status") as string
-      return (
-        <Badge variant={status === 'completed' ? 'default' : status === 'pending' ? 'secondary' : 'destructive'}>{status}</Badge>
-      )
-    },
-    filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id))
-      },
   },
   {
     id: "actions",

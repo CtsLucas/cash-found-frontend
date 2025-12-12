@@ -38,7 +38,6 @@ export function RecentTransactions() {
             <TableRow>
               <TableHead>Description</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
-              <TableHead className="hidden sm:table-cell">Status</TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
           </TableHeader>
@@ -52,11 +51,6 @@ export function RecentTransactions() {
                   </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell capitalize">{transaction.type}</TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  <Badge className="text-xs" variant={transaction.status === 'completed' ? 'default' : transaction.status === 'pending' ? 'secondary' : 'destructive'}>
-                    {transaction.status}
-                  </Badge>
-                </TableCell>
                 <TableCell className={`text-right ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
                   {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                 </TableCell>

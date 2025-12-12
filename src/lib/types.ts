@@ -5,7 +5,6 @@ export type Transaction = {
   amount: number;
   type: 'income' | 'expense';
   category: Category;
-  status: 'pending' | 'completed' | 'failed';
 };
 
 export type Category = 'Groceries' | 'Utilities' | 'Rent' | 'Salary' | 'Freelance' | 'Entertainment' | 'Transport';
