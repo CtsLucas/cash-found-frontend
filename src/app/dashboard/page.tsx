@@ -44,7 +44,7 @@ export default function DashboardPage() {
         <MonthYearPicker date={currentDate} setDate={setCurrentDate} />
       </div>
       <OverviewCards transactions={transactions} isLoading={isLoading} />
-      <MonthlyDebits transactions={transactions} isLoading={isLoading} />
+      <MonthlyDebits transactions={transactions} isLoading={isLoading} currentDate={currentDate} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="lg:col-span-4">
           <RecentTransactions />

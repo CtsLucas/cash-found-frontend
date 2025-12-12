@@ -63,9 +63,10 @@ const MonthlyDebitsSkeleton = () => {
 interface MonthlyDebitsProps {
     transactions: Transaction[] | null;
     isLoading: boolean;
+    currentDate: Date;
 }
 
-export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
+export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyDebitsProps) {
   const firestore = useFirestore();
   const { user } = useUser();
   
@@ -91,7 +92,7 @@ export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
                 const card = cards.find(c => c.id === t.cardId);
                 acc[t.cardId!] = {
                     cardName: card?.cardName || 'Unknown Card',
-                    dueDate: card ? setDate(new Date(), card.dueDate) : null,
+                    dueDate: card ? setDate(currentDate, card.dueDate) : null,
                     total: 0,
                 };
             }
@@ -101,7 +102,7 @@ export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
     
     return { directDebits, cardInvoices: Object.values(cardInvoices) };
 
-  }, [transactions, cards]);
+  }, [transactions, cards, currentDate]);
 
   const allDebits = [...directDebits.map(d => ({...d, isInvoice: false})), ...cardInvoices.map(i => ({...i, isInvoice: true}))];
 
