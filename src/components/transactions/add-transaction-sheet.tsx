@@ -257,7 +257,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                             <FormControl>
                                 <RadioGroup 
                                     onValueChange={field.onChange} 
-                                    defaultValue={field.value} 
+                                    value={field.value}
                                     className="grid grid-cols-2 gap-2"
                                 >
                                     <FormItem>
@@ -519,4 +519,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   );
 }
 
-    
