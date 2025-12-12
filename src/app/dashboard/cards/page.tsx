@@ -9,6 +9,7 @@ import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
 import { PlusCircle } from "lucide-react";
 import { useMemo } from "react";
+import { AddCardSheet } from "@/components/cards/add-card-sheet";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -72,12 +73,7 @@ export default function CardsPage() {
         <div className="flex items-center">
             <h1 className="text-3xl font-bold tracking-tight font-headline">My Cards</h1>
             <div className="ml-auto flex items-center gap-2">
-                <Button size="sm" className="h-8 gap-1">
-                    <PlusCircle className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Add Card
-                    </span>
-                </Button>
+                <AddCardSheet />
             </div>
         </div>
         {isLoadingCards && <p>Loading cards...</p>}
@@ -85,7 +81,7 @@ export default function CardsPage() {
             {cards?.map(card => {
                 const spending = getCardSpending(card.id);
                 const availableLimit = card.limit - spending;
-                const usagePercentage = (spending / card.limit) * 100;
+                const usagePercentage = card.limit > 0 ? (spending / card.limit) * 100 : 0;
 
                 return (
                     <Card key={card.id}>
