@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import {
@@ -37,7 +36,7 @@ import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { add } from "date-fns";
+import { add, format } from "date-fns";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -156,7 +155,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             form.reset(defaultValues);
         }
     }
-  }, [user, isOpen, editingTransaction, currentMonth]);
+  }, [user, isOpen, editingTransaction, currentMonth, form]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
@@ -173,6 +172,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
       dataToSave.cardId = '';
     }
 
+    const installmentCount = data.installments || 1;
+    
     if (isEditing) {
         if(editingTransaction?.id) {
             const transactionRef = doc(firestore, `users/${user.uid}/transactions/${editingTransaction.id}`);
@@ -180,34 +181,38 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             // We just update the main transaction.
             setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
         }
-    } else {
-      // Create new transaction
-      const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
-      const newTransactionRef = doc(transactionsCollection); // Create a new doc ref to get the ID
-      
-      await addDocumentNonBlocking(transactionsCollection, { ...dataToSave, id: newTransactionRef.id });
-
-      // Handle installments
-      const installmentCount = data.installments || 1;
-      if (isCardExpense && installmentCount > 1) {
-        const installmentAmount = calculatedAmount / installmentCount;
+    } else if (isCardExpense && installmentCount > 1) {
         const batch = writeBatch(firestore);
-        const transactionDate = new Date(data.date);
+        const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
+        
+        const installmentAmount = calculatedAmount / installmentCount;
+        const startingInvoiceDate = data.invoiceMonth ? new Date(data.invoiceMonth) : new Date();
+        const originalTransactionDate = new Date(data.date);
 
         for (let i = 0; i < installmentCount; i++) {
-          const installmentDate = add(transactionDate, { months: i });
-          const installmentDocRef = doc(collection(firestore, `users/${user.uid}/transactions/${newTransactionRef.id}/installments`));
-          
-          batch.set(installmentDocRef, {
-            id: installmentDocRef.id,
-            transactionId: newTransactionRef.id,
-            dueDate: installmentDate.toISOString(),
-            amount: installmentAmount,
-            isPaid: false,
-          });
+            const newTransactionRef = doc(transactionsCollection);
+
+            const installmentDate = add(originalTransactionDate, { months: i });
+            const invoiceDate = add(startingInvoiceDate, { months: i });
+
+            const installmentTransaction = {
+                ...dataToSave,
+                id: newTransactionRef.id,
+                amount: installmentAmount,
+                deduction: 0, // Deduction is applied once to the total amount before splitting
+                description: `${data.description} (${i + 1}/${installmentCount})`,
+                date: format(installmentDate, 'yyyy-MM-dd'),
+                invoiceMonth: format(invoiceDate, 'MMMM yyyy'),
+                installments: installmentCount,
+            };
+            batch.set(newTransactionRef, installmentTransaction);
         }
         await batch.commit();
-      }
+
+    } else {
+      // Create a single new transaction
+      const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
+      addDocumentNonBlocking(transactionsCollection, dataToSave);
     }
     
     setIsOpen(false);
@@ -309,7 +314,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     )}
                 </div>
                 
-                <div className={cn("text-right text-lg font-bold", type === 'expense' && "text-destructive")}>
+                <div className={cn("text-right text-lg font-bold", type === 'expense' ? "text-destructive" : "text-green-500")}>
                     Final Amount: ${Number(calculatedAmount).toFixed(2)}
                 </div>
                 
@@ -385,9 +390,9 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                 {tags?.map((tag) => (
                                                     <CommandItem
                                                         key={tag.id}
-                                                        value={tag.name}
+                                                        value={tag.id}
                                                         onSelect={(currentValue) => {
-                                                          const tagId = tags.find(t => t.name.toLowerCase() === currentValue.toLowerCase())?.id;
+                                                          const tagId = currentValue;
                                                           if (!tagId) return;
 
                                                           const selectedTags = field.value || [];
@@ -398,6 +403,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                           } else {
                                                               field.onChange([...selectedTags, tagId]);
                                                           }
+                                                          setOpenTags(true); // Keep the popover open
                                                         }}
                                                     >
                                                         {tag.name}
@@ -502,3 +508,5 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
+    
