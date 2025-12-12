@@ -1,6 +1,11 @@
+
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ArrowUp, ArrowDown, Scale } from "lucide-react";
-import { totalIncome, totalExpenses, balance } from "@/lib/data";
+import { ArrowUp, ArrowDown, Scale } from "lucide-react";
+import { Transaction } from "@/lib/types";
+import { useMemo } from "react";
+import { Skeleton } from "../ui/skeleton";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-US', {
@@ -9,7 +14,46 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export function OverviewCards() {
+interface OverviewCardsProps {
+  transactions: Transaction[] | null;
+  isLoading: boolean;
+}
+
+const OverviewSkeleton = () => (
+  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-4" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-3 w-40 mt-2" />
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+export function OverviewCards({ transactions, isLoading }: OverviewCardsProps) {
+  const { totalIncome, totalExpenses, balance } = useMemo(() => {
+    if (!transactions) {
+      return { totalIncome: 0, totalExpenses: 0, balance: 0 };
+    }
+    const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+    const expenses = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (t.amount - (t.deduction || 0)), 0);
+    return {
+      totalIncome: income,
+      totalExpenses: expenses,
+      balance: income - expenses
+    };
+  }, [transactions]);
+  
+  if (isLoading) {
+    return <OverviewSkeleton />;
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card>
@@ -19,7 +63,7 @@ export function OverviewCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
-          <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+          {/* <p className="text-xs text-muted-foreground">+20.1% from last month</p> */}
         </CardContent>
       </Card>
       <Card>
@@ -29,7 +73,7 @@ export function OverviewCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
-          <p className="text-xs text-muted-foreground">+18.1% from last month</p>
+          {/* <p className="text-xs text-muted-foreground">+18.1% from last month</p> */}
         </CardContent>
       </Card>
       <Card>
@@ -39,7 +83,7 @@ export function OverviewCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(balance)}</div>
-          <p className="text-xs text-muted-foreground">Your current account balance</p>
+          <p className="text-xs text-muted-foreground">Your account balance this month</p>
         </CardContent>
       </Card>
     </div>
