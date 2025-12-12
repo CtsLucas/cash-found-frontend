@@ -45,6 +45,19 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     enableHiding: false,
   },
   {
+    accessorKey: "description",
+    header: "Description",
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[300px] truncate font-medium">
+            {row.getValue("description")}
+          </span>
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: "date",
     header: () => <div className="text-center">Date</div>,
     cell: ({ row }) => {
@@ -63,19 +76,6 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
             <div className="text-center">{clientDate}</div>
         )
     }
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="max-w-[300px] truncate font-medium">
-            {row.getValue("description")}
-          </span>
-        </div>
-      )
-    },
   },
   {
     accessorKey: "category",
