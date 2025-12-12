@@ -113,6 +113,7 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
                     <TableRow>
                         <TableHead>Date</TableHead>
                         <TableHead>Description</TableHead>
+                        <TableHead>Installment</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -121,6 +122,9 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
                         <TableRow key={t.id}>
                             <TableCell>{new Date(t.date).toLocaleDateString()}</TableCell>
                             <TableCell>{t.description}</TableCell>
+                            <TableCell>
+                                {t.installments && t.currentInstallment ? `${t.currentInstallment}/${t.installments}` : '-'}
+                            </TableCell>
                             <TableCell className="text-right">{formatCurrency(t.amount - (t.deduction || 0))}</TableCell>
                         </TableRow>
                     ))}
