@@ -1,4 +1,5 @@
 
+
 export const seedCategories = [
     // Expenses
     { name: 'Groceries', type: 'expense' },
