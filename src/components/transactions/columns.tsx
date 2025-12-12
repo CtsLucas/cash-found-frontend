@@ -81,10 +81,10 @@ export const columns: ColumnDef<Transaction>[] = [
       return (
         <div className="text-right font-medium text-red-500">
             {deduction ? (
-                <div className="flex flex-col items-end">
+                <div className="flex items-center justify-end gap-2">
                     <span>-{formatCurrency(finalAmount)}</span>
                     <span className="text-xs text-muted-foreground line-through">
-                        ({formatCurrency(amount)} - {formatCurrency(deduction)})
+                        {formatCurrency(amount)}
                     </span>
                 </div>
             ) : (
