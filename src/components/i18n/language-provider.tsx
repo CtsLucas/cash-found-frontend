@@ -2,10 +2,10 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { en } from '@/locales/en';
-import { ptBR } from '@/locales/pt-br';
+import en from '@/locales/en.json';
+import ptBR from '@/locales/pt-br.json';
 import { Locale } from '@/lib/types';
-import { get, set } from 'lodash';
+import { get } from 'lodash';
 
 type Translations = typeof en;
 
