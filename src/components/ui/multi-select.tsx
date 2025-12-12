@@ -31,8 +31,6 @@ export function MultiSelect({
     selected, 
     onChange, 
     placeholder = "Select...",
-    searchPlaceholder = "Search...",
-    emptyPlaceholder = "No results found.",
     className,
     ...props
 }: MultiSelectProps) {
@@ -49,6 +47,7 @@ export function MultiSelect({
     if (input) {
       if (e.key === "Delete" || e.key === "Backspace") {
         if (input.value === "" && selected.length > 0) {
+          e.preventDefault();
           handleUnselect(selected[selected.length - 1]);
         }
       }
@@ -61,7 +60,7 @@ export function MultiSelect({
   const selectables = options.filter(option => !selected.includes(option.value));
 
   return (
-    <Command onKeyDown={handleKeyDown} className="overflow-visible bg-transparent">
+    <Command onKeyDown={handleKeyDown} className={cn("overflow-visible bg-transparent", className)}>
       <div
         className="group border border-input rounded-md px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
       >
@@ -90,49 +89,47 @@ export function MultiSelect({
               </Badge>
             );
           })}
-          {/* Avoid having the "Search" Icon */}
           <CommandPrimitive.Input
             ref={inputRef}
             value={inputValue}
             onValueChange={setInputValue}
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
-            placeholder={selected.length ? '' : placeholder}
+            placeholder={placeholder}
             className={cn(
                 "ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1",
-                 selected.length ? 'w-auto' : 'w-full'
+                selected.length > 0 ? 'w-auto' : 'w-full'
             )}
-            
           />
         </div>
       </div>
       <div className="relative mt-2">
+        <CommandList>
         {open && selectables.length > 0 ? (
           <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-            <CommandList>
-              <CommandGroup className="h-full overflow-auto">
-                {selectables.map((option) => {
-                  return (
-                    <CommandItem
-                      key={option.value}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      onSelect={(value) => {
-                        setInputValue("");
-                        onChange([...selected, option.value]);
-                      }}
-                      className={"cursor-pointer"}
-                    >
-                      {option.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
+            <CommandGroup className="h-full overflow-auto">
+              {selectables.map((option) => {
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onSelect={() => {
+                      setInputValue("");
+                      onChange([...selected, option.value]);
+                    }}
+                    className={"cursor-pointer"}
+                  >
+                    {option.label}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
           </div>
         ) : null}
+        </CommandList>
       </div>
     </Command>
   );
