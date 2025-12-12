@@ -34,7 +34,7 @@ export type Card = {
   id: string;
   cardName: string;
   limit: number;
-  dueDate: string;
+  dueDate: number;
   last4: string;
   color?: string;
   userId?: string;

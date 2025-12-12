@@ -21,7 +21,7 @@ import { Transaction, Card as CardType } from "@/lib/types";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "../ui/skeleton";
 import { useMemo } from "react";
-import { format } from "date-fns";
+import { format, setDate } from "date-fns";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -91,7 +91,7 @@ export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
                 const card = cards.find(c => c.id === t.cardId);
                 acc[t.cardId!] = {
                     cardName: card?.cardName || 'Unknown Card',
-                    dueDate: card?.dueDate ? new Date(`${card.dueDate}T00:00:00Z`) : null,
+                    dueDate: card ? setDate(new Date(), card.dueDate) : null,
                     total: 0,
                 };
             }
@@ -141,7 +141,7 @@ export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
                         <TableRow key={`invoice-${index}`}>
                              <TableCell className="font-medium">Invoice for {invoice.cardName}</TableCell>
                              <TableCell className="text-center">
-                                {invoice.dueDate ? invoice.dueDate.toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', timeZone: 'UTC' }) : 'N/A'}
+                                {invoice.dueDate ? format(invoice.dueDate, 'dd/MM') : 'N/A'}
                              </TableCell>
                              <TableCell className="text-right text-destructive font-bold">
                                 -{formatCurrency(invoice.total)}

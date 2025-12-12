@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import {
@@ -29,7 +30,7 @@ import { CurrencyInput } from "../ui/currency-input";
 const cardSchema = z.object({
     cardName: z.string().min(1, "Card name is required"),
     limit: z.coerce.number().positive("Limit must be positive"),
-    dueDate: z.string().min(1, "Due date is required"),
+    dueDate: z.coerce.number().min(1, "Due day is required").max(31, "Must be a valid day"),
     last4: z.string().length(4, "Must be 4 digits").regex(/^\d{4}$/, "Must be 4 digits"),
     color: z.string().optional(),
     userId: z.string()
@@ -58,7 +59,7 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
     defaultValues: {
       cardName: "",
       limit: 0,
-      dueDate: "",
+      dueDate: 1,
       last4: "",
       color: "#6b7280",
       userId: user?.uid
@@ -70,18 +71,16 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
         const defaultValues = {
             cardName: "",
             limit: 0,
-            dueDate: "",
+            dueDate: 1,
             last4: "",
             color: "#6b7280",
             userId: user.uid
         };
 
         if (isEditing && editingCard) {
-            // Firestore date is a string 'YYYY-MM-DD', which is what the input expects.
-            // No conversion is needed.
             form.reset({
                 ...editingCard,
-                dueDate: editingCard.dueDate || '',
+                dueDate: editingCard.dueDate || 1,
             });
         } else {
             form.reset(defaultValues);
@@ -162,9 +161,9 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                         name="dueDate"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Due Date</FormLabel>
+                                <FormLabel>Due Day</FormLabel>
                                 <FormControl>
-                                    <Input type="date" {...field} />
+                                    <Input type="number" min="1" max="31" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
