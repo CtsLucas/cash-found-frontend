@@ -29,7 +29,7 @@ export function MainNav({ isCollapsed }: { isCollapsed: boolean }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col items-center gap-2 px-2 sm:py-5">
+    <nav className="grid items-start gap-2 px-2 text-sm font-medium lg:px-4 sm:py-5">
       {navItems.map((item) => {
         const isActive = pathname.startsWith(item.href) && (item.href !== "/dashboard" || pathname === "/dashboard");
         return (
@@ -38,14 +38,13 @@ export function MainNav({ isCollapsed }: { isCollapsed: boolean }) {
                 <Link
                 href={item.href}
                 className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
-                    isActive && "bg-primary/10 text-primary",
-                    isCollapsed && "h-9 w-9",
-                    !isCollapsed && "w-full justify-start px-3"
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                    isActive && "bg-primary text-primary-foreground hover:text-primary-foreground",
+                    isCollapsed && "h-9 w-9 justify-center"
                 )}
                 >
-                <item.icon className="h-5 w-5" />
-                <span className={cn("sr-only", !isCollapsed && "not-sr-only ml-3")}>
+                <item.icon className="h-4 w-4" />
+                <span className={cn(isCollapsed ? "sr-only" : "")}>
                     {item.label}
                 </span>
                 </Link>
