@@ -130,7 +130,7 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
+      allow list: if false; // Prevent listing all users
       allow create: if isOwner(userId) && hasValidIdOnCreate(userId);
       allow update: if isExistingOwner(userId) && idIsImmutable();
       allow delete: if isExistingOwner(userId);
@@ -139,11 +139,11 @@ service cloud.firestore {
        * @description Manages user-specific financial transactions.
        * @path /users/{userId}/transactions/{transactionId}
        * @allow A user (auth.uid='user123') can (create) a new transaction in their own subcollection `/users/user123/transactions/tx456`.
-       * @deny A user (auth.uid='userABC') cannot (list) transactions at `/users/user123/transactions`.
-       * @principle Enforces strict data ownership within a user's private data tree.
+       * @deny A user (auth.uid='userABC') cannot (list) transactions at `/users/user123/transactions` if they are not the owner.
+       * @principle Enforces strict data ownership for reads and writes within a user's private data tree.
        */
       match /transactions/{transactionId} {
-        allow get, list: if isOwner(userId);
+        allow read, list: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -157,7 +157,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /categories/{categoryId} {
-        allow get, list: if isOwner(userId);
+        allow read, list: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -171,7 +171,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /tags/{tagId} {
-        allow get, list: if isOwner(userId);
+        allow read, list: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -185,7 +185,7 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /cards/{cardId} {
-        allow get, list: if isOwner(userId);
+        allow read, list: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
@@ -198,7 +198,7 @@ service cloud.firestore {
          * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent card.
          */
         match /invoices/{invoiceId} {
-          allow get, list: if isOwner(userId);
+          allow read, list: if isOwner(userId);
           allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
           allow update: if isExistingOwner(userId) && cardIdIsImmutable();
           allow delete: if isExistingOwner(userId);
@@ -213,7 +213,7 @@ service cloud.firestore {
        * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent transaction.
        */
       match /transactions/{transactionId}/installments/{installmentId} {
-        allow get, list: if isOwner(userId);
+        allow read, list: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
         allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
         allow delete: if isExistingOwner(userId);
