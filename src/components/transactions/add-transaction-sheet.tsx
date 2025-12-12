@@ -262,34 +262,36 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                     className="grid grid-cols-2 gap-2"
                                 >
                                     <FormItem>
-                                        <FormControl>
-                                            <RadioGroupItem value="expense" id="r1" className="sr-only" />
-                                        </FormControl>
-                                        <div
-                                            onClick={() => field.onChange('expense')}
-                                            className={cn(
-                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 cursor-pointer",
-                                                "hover:bg-red-500/10 hover:border-red-500/20",
-                                                field.value === 'expense' && "bg-red-500 text-white border-red-500 hover:bg-red-500/90"
-                                            )}
-                                        >
-                                            Expense
-                                        </div>
+                                        <Label className="cursor-pointer">
+                                            <FormControl>
+                                                <RadioGroupItem value="expense" id="r1" className="sr-only" />
+                                            </FormControl>
+                                            <div
+                                                className={cn(
+                                                    "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4",
+                                                    "hover:bg-red-500/10 hover:border-red-500/20",
+                                                    field.value === 'expense' && "bg-red-500 text-white border-red-500 hover:bg-red-500/90"
+                                                )}
+                                            >
+                                                Expense
+                                            </div>
+                                        </Label>
                                     </FormItem>
                                     <FormItem>
-                                        <FormControl>
-                                            <RadioGroupItem value="income" id="r2" className="sr-only" />
-                                        </FormControl>
-                                        <div
-                                            onClick={() => field.onChange('income')}
-                                            className={cn(
-                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 cursor-pointer",
-                                                "hover:bg-green-500/10 hover:border-green-500/20",
-                                                field.value === 'income' && "bg-green-500 text-white border-green-500 hover:bg-green-500/90"
-                                            )}
-                                        >
-                                            Income
-                                        </div>
+                                         <Label className="cursor-pointer">
+                                            <FormControl>
+                                                <RadioGroupItem value="income" id="r2" className="sr-only" />
+                                            </FormControl>
+                                            <div
+                                                className={cn(
+                                                    "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4",
+                                                    "hover:bg-green-500/10 hover:border-green-500/20",
+                                                    field.value === 'income' && "bg-green-500 text-white border-green-500 hover:bg-green-500/90"
+                                                )}
+                                            >
+                                                Income
+                                            </div>
+                                        </Label>
                                     </FormItem>
                                 </RadioGroup>
                             </FormControl>
@@ -298,7 +300,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className={cn("grid gap-4", type === 'expense' ? 'grid-cols-2' : 'grid-cols-1')}>
                     <FormField
                         control={form.control}
                         name="amount"
@@ -337,9 +339,18 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     )}
                 </div>
                 
-                <div className={cn("text-right text-lg font-bold", type === 'expense' ? "text-destructive" : "text-green-500")}>
-                    Final Amount: ${Number(calculatedAmount).toFixed(2)}
-                </div>
+                {type === 'expense' && (
+                    <FormItem>
+                        <FormLabel>Final Amount</FormLabel>
+                        <FormControl>
+                            <CurrencyInput 
+                                value={calculatedAmount}
+                                disabled 
+                                className={cn(type === 'expense' ? "text-destructive" : "text-green-500", "font-bold")}
+                            />
+                        </FormControl>
+                    </FormItem>
+                )}
                 
                 <Separator />
                 
@@ -527,3 +538,5 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
+    
