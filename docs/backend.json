@@ -1,0 +1,415 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the FinanceFlow application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "googleId": {
+          "type": "string",
+          "description": "The unique identifier for the user provided by Google."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the user."
+        }
+      },
+      "required": [
+        "id",
+        "googleId",
+        "email",
+        "name"
+      ]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a financial transaction made by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Transaction entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Transaction)"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the transaction.",
+          "format": "date-time"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount of the transaction."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the transaction."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Transaction)"
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags. (Relationship: Tag N:N Transaction)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "date",
+        "amount",
+        "description",
+        "categoryId"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category for classifying financial transactions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the category."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Category).  This represents the user who created the category. Null implies a default/system category."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "Tag": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tag",
+      "type": "object",
+      "description": "Represents a tag for labeling financial transactions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Tag entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the tag."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Tag). This represents the user who created the tag. Null implies a default/system tag."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Installment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Installment",
+      "type": "object",
+      "description": "Represents an installment payment for a transaction.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Installment entity."
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "Reference to Transaction. (Relationship: Transaction 1:N Installment)"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Due date for the installment.",
+          "format": "date-time"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount due for the installment."
+        },
+        "isPaid": {
+          "type": "boolean",
+          "description": "Indicates whether the installment has been paid."
+        }
+      },
+      "required": [
+        "id",
+        "transactionId",
+        "dueDate",
+        "amount",
+        "isPaid"
+      ]
+    },
+    "Card": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Card",
+      "type": "object",
+      "description": "Represents a credit or debit card.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Card entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Card)"
+        },
+        "cardNumber": {
+          "type": "string",
+          "description": "Card number (masked for security)."
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Card expiry date.",
+          "format": "date-time"
+        },
+        "creditLimit": {
+          "type": "number",
+          "description": "Credit limit of the card."
+        },
+        "availableCredit": {
+          "type": "number",
+          "description": "Available credit on the card."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "cardNumber",
+        "expiryDate",
+        "creditLimit",
+        "availableCredit"
+      ]
+    },
+    "Invoice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invoice",
+      "type": "object",
+      "description": "Represents an invoice associated with a transaction.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Invoice entity."
+        },
+        "cardId": {
+          "type": "string",
+          "description": "Reference to Card. (Relationship: Card 1:N Invoice)"
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "Reference to Transaction. (Relationship: Transaction 1:N Invoice)"
+        },
+        "invoiceDate": {
+          "type": "string",
+          "description": "Date of the invoice.",
+          "format": "date-time"
+        },
+        "amountDue": {
+          "type": "number",
+          "description": "Amount due on the invoice."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Due date of the invoice.",
+          "format": "date-time"
+        },
+        "isPaid": {
+          "type": "boolean",
+          "description": "Indicates whether the invoice has been paid."
+        }
+      },
+      "required": [
+        "id",
+        "cardId",
+        "transactionId",
+        "invoiceDate",
+        "amountDue",
+        "dueDate",
+        "isPaid"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. The 'userId' parameter corresponds to the Firebase Auth UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching the Firebase Auth UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/transactions/{transactionId}",
+        "definition": {
+          "entityName": "Transaction",
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores financial transactions for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns the transaction."
+            },
+            {
+              "name": "transactionId",
+              "description": "The unique ID of the transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores categories of financial transactions for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns the category."
+            },
+            {
+              "name": "categoryId",
+              "description": "The unique ID of the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/tags/{tagId}",
+        "definition": {
+          "entityName": "Tag",
+          "schema": {
+            "$ref": "#/backend/entities/Tag"
+          },
+          "description": "Stores tags for labeling financial transactions for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns the tag."
+            },
+            {
+              "name": "tagId",
+              "description": "The unique ID of the tag."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/transactions/{transactionId}/installments/{installmentId}",
+        "definition": {
+          "entityName": "Installment",
+          "schema": {
+            "$ref": "#/backend/entities/Installment"
+          },
+          "description": "Stores installment payments for a specific transaction.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns the transaction."
+            },
+            {
+              "name": "transactionId",
+              "description": "The unique ID of the transaction."
+            },
+            {
+              "name": "installmentId",
+              "description": "The unique ID of the installment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/cards/{cardId}",
+        "definition": {
+          "entityName": "Card",
+          "schema": {
+            "$ref": "#/backend/entities/Card"
+          },
+          "description": "Stores credit or debit card information for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns the card."
+            },
+            {
+              "name": "cardId",
+              "description": "The unique ID of the card."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/cards/{cardId}/invoices/{invoiceId}",
+        "definition": {
+          "entityName": "Invoice",
+          "schema": {
+            "$ref": "#/backend/entities/Invoice"
+          },
+          "description": "Stores invoice details for a card.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns the card."
+            },
+            {
+              "name": "cardId",
+              "description": "The unique ID of the card."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique ID of the invoice."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure security, scalability, and ease of debugging, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs. It uses Structural Segregation to ensure homogeneous security postures for each collection and Access Modeling to standardize authorization patterns.\n\n*   **Users:** Users are stored in a dedicated collection `/users/{userId}`. Authentication relies solely on `request.auth.uid`, aligning with DBAC.\n*   **Transactions, Categories, Tags, Cards:** These entities are nested under `/users/{userId}` to represent the `User 1:N` relationship, enabling path-based ownership for private data.\n*   **Installments:** Nested under `/users/{userId}/transactions/{transactionId}/installments/{installmentId}` to reflect the `Transaction 1:N Installment` relationship. This structure maintains clear ownership and avoids complex authorization logic.\n*   **Invoices:** Nested under `/users/{userId}/cards/{cardId}/invoices/{invoiceId}` to represent the `Card 1:N Invoice` relationship. This structure ensures invoices are always associated with a specific card owned by a user, simplifying access control.\n\n**Authorization Independence:**  Denormalization is not required in this design because all subcollections inherit ownership from the parent `userId` path segment, enabling secure and independent authorization rules without needing to `get()` parent documents. Path-based rules are simple and efficient.\n\n**QAPs Support:** Structural segregation is used effectively. Each collection has a clear, consistent security posture.  List operations are secured by path-based rules, ensuring that users can only access data they own. This design inherently supports QAPs because rules act as gatekeepers, not filters."
+  }
+}

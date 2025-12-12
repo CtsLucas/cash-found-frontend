@@ -1,0 +1,224 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model. All data is considered private and can only be
+ * accessed by the user who created it. There are no public or shared collections.
+ *
+ * Data Structure: The entire data model is hierarchical, with all user-specific data (transactions, cards, categories, etc.)
+ * nested under a top-level `/users/{userId}` collection. The `{userId}` in the path always corresponds to the
+ * Firebase Authentication UID of the owner.
+ *
+ * Key Security Decisions:
+ * - User Enumeration Disabled: Listing documents in the top-level `/users` collection is explicitly forbidden to protect user privacy.
+ * - Strict Path-Based Authorization: Access to any document or subcollection is granted solely by matching the `{userId}` in
+ *   the document path with the requester's `request.auth.uid`.
+ * - No Public Data: There are no globally readable collections. A user must be signed in to access any data, and even then,
+ *   they can only access their own data tree.
+ *
+ * Denormalization for Authorization: The hierarchical structure provides ownership context directly in the document path.
+ * This avoids the need for slow and costly `get()` calls to parent documents for authorization. For relational integrity,
+ * documents within a user's data tree (e.g., a transaction) must contain a `userId` field that matches the `userId` from the
+ * path. This link is enforced on creation and made immutable on update.
+ *
+ * Structural Segregation: The data model naturally segregates each user's data into their own document tree. This is the
+ * most secure and performant way to handle private user data, ensuring that queries for one user can never leak data
+ * from another.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------------------------------------------------------------------------------
+    // Helper Functions
+    // --------------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId from the path.
+     * This is the primary function for enforcing data ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if a document exists before an update or delete operation.
+     * This prevents operations on non-existent documents.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    /**
+     * A convenience function that combines ownership and existence checks for update/delete operations.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && isExistingDoc();
+    }
+
+    /**
+     * VALIDATION: Ensures that on user profile creation, the document's internal `id` field
+     * matches the document ID (`userId`), which is the user's auth UID.
+     */
+    function hasValidIdOnCreate(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * VALIDATION: Ensures the internal `id` field of a user document is immutable.
+     */
+    function idIsImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * VALIDATION: Ensures a new document has a `userId` field matching the owner's UID from the path.
+     */
+    function hasValidUserIdOnCreate(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    /**
+     * VALIDATION: Ensures the `userId` field on a document is immutable after creation.
+     */
+    function userIdIsImmutable() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * VALIDATION: Ensures a new installment document has a `transactionId` field matching the parent path.
+     */
+    function hasValidTransactionIdOnCreate(transactionId) {
+      return request.resource.data.transactionId == transactionId;
+    }
+
+    /**
+     * VALIDATION: Ensures the `transactionId` field on an installment is immutable.
+     */
+    function transactionIdIsImmutable() {
+      return request.resource.data.transactionId == resource.data.transactionId;
+    }
+    
+    /**
+     * VALIDATION: Ensures a new invoice document has a `cardId` field matching the parent path.
+     */
+    function hasValidCardIdOnCreate(cardId) {
+      return request.resource.data.cardId == cardId;
+    }
+
+    /**
+     * VALIDATION: Ensures the `cardId` field on an invoice is immutable.
+     */
+    function cardIdIsImmutable() {
+      return request.resource.data.cardId == resource.data.cardId;
+    }
+
+    // --------------------------------------------------------------------------------
+    // Collection Rules
+    // --------------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents.
+     * @path /users/{userId}
+     * @allow A user (auth.uid='user123') can (get) their own profile at `/users/user123`.
+     * @deny An anonymous user cannot (list) the `/users` collection. A user cannot (get) another user's profile.
+     * @principle Restricts access to a user's own profile and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && hasValidIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && idIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages user-specific financial transactions.
+     * @path /users/{userId}/transactions/{transactionId}
+     * @allow A user (auth.uid='user123') can (create) a new transaction in their own subcollection `/users/user123/transactions/tx456`.
+     * @deny A user (auth.uid='userABC') cannot (list) transactions at `/users/user123/transactions`.
+     * @principle Enforces strict data ownership within a user's private data tree.
+     */
+    match /users/{userId}/transactions/{transactionId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && userIdIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages user-specific categories for transactions.
+     * @path /users/{userId}/categories/{categoryId}
+     * @allow A user (auth.uid='user123') can (list) their own categories at `/users/user123/categories`.
+     * @deny A user (auth.uid='userABC') cannot (delete) a category at `/users/user123/categories/cat789`.
+     * @principle Enforces strict data ownership within a user's private data tree.
+     */
+    match /users/{userId}/categories/{categoryId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && userIdIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages user-specific tags for transactions.
+     * @path /users/{userId}/tags/{tagId}
+     * @allow A user (auth.uid='user123') can (update) their own tag at `/users/user123/tags/tag456`.
+     * @deny An anonymous user cannot (get) any tag.
+     * @principle Enforces strict data ownership within a user's private data tree.
+     */
+    match /users/{userId}/tags/{tagId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && userIdIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages user-specific credit/debit cards.
+     * @path /users/{userId}/cards/{cardId}
+     * @allow A user (auth.uid='user123') can (get) their own card at `/users/user123/cards/card789`.
+     * @deny A user (auth.uid='userABC') cannot (create) a card in another user's account.
+     * @principle Enforces strict data ownership within a user's private data tree.
+     */
+    match /users/{userId}/cards/{cardId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && userIdIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages installment payments for a specific transaction.
+     * @path /users/{userId}/transactions/{transactionId}/installments/{installmentId}
+     * @allow A user (auth.uid='user123') can (list) installments for their own transaction at `/users/user123/transactions/tx456/installments`.
+     * @deny A user (auth.uid='userABC') cannot (get) an installment belonging to another user.
+     * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent transaction.
+     */
+    match /users/{userId}/transactions/{transactionId}/installments/{installmentId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
+      allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+    
+    /**
+     * @description Manages invoices for a specific card.
+     * @path /users/{userId}/cards/{cardId}/invoices/{invoiceId}
+     * @allow A user (auth.uid='user123') can (create) an invoice for their own card at `/users/user123/cards/card789/invoices/inv001`.
+     * @deny A user (auth.uid='userABC') cannot (list) invoices for another user's card.
+     * @principle Inherits ownership from the top-level user path and validates relational integrity with the parent card.
+     */
+    match /users/{userId}/cards/{cardId}/invoices/{invoiceId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
+      allow update: if isExistingOwner(userId) && cardIdIsImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+  }
+}
