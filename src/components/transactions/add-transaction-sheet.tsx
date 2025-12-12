@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { add, format } from "date-fns";
 import { CurrencyInput } from "../ui/currency-input";
+import { Label } from "../ui/label";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -256,8 +257,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <RadioGroup 
-                                    onValueChange={field.onChange} 
+                                <RadioGroup
+                                    onValueChange={field.onChange}
                                     value={field.value}
                                     className="grid grid-cols-2 gap-2"
                                 >
@@ -538,5 +539,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
-
-    
