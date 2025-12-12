@@ -1,4 +1,6 @@
 
+'use client'
+
 import {
     Tabs,
     TabsContent,
@@ -10,6 +12,7 @@ import { categories, tags } from "@/lib/data"
 import { categoryColumns } from "@/components/management/categories/columns"
 import { tagColumns } from "@/components/management/tags/columns"
 import { AddItemSheet } from "@/components/management/add-item-sheet"
+import { ClientOnly } from "@/components/client-only"
   
 export default function ManagementPage() {
 return (
@@ -28,10 +31,14 @@ return (
             </div>
             </div>
             <TabsContent value="categories">
+              <ClientOnly>
                 <DataTable columns={categoryColumns} data={categories} />
+              </ClientOnly>
             </TabsContent>
             <TabsContent value="tags">
+              <ClientOnly>
                 <DataTable columns={tagColumns} data={tags} />
+              </ClientOnly>
             </TabsContent>
         </Tabs>
     </>

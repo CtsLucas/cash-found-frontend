@@ -1,3 +1,6 @@
+
+'use client'
+
 import {
     File,
   } from "lucide-react"
@@ -14,6 +17,7 @@ import {
   import { columns } from "@/components/transactions/columns"
   import { transactions } from "@/lib/data"
   import { AddTransactionSheet } from "@/components/transactions/add-transaction-sheet"
+import { ClientOnly } from "@/components/client-only"
   
   export default function TransactionsPage() {
     return (
@@ -39,7 +43,9 @@ import {
                 </div>
               </div>
               <TabsContent value="all">
-                <DataTable columns={columns} data={transactions} />
+                <ClientOnly>
+                  <DataTable columns={columns} data={transactions} />
+                </ClientOnly>
               </TabsContent>
             </Tabs>
         </>
