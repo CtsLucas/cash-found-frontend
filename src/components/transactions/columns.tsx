@@ -140,9 +140,11 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
 
         const card = cards?.find(c => c.id === cardId);
 
-        return (
-            <div>{card ? `${card.cardName} - ${card.last4}` : ''}</div>
-        )
+        return card ? (
+            <Badge style={{ backgroundColor: card.color }} className="text-white">
+                {card.cardName}
+            </Badge>
+        ) : null;
     }
   },
   {
