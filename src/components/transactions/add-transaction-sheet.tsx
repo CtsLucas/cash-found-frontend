@@ -38,7 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { add, format } from "date-fns";
 import { CurrencyInput } from "../ui/currency-input";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -434,7 +434,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                             } else {
                                                                 field.onChange([...selectedTags, currentValue]);
                                                             }
-                                                            setOpenTags(true);
                                                         }}
                                                     >
                                                         {tag.name}
