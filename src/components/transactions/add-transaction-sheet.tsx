@@ -397,86 +397,84 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 <FormField
                     control={form.control}
                     name="tags"
-                    render={({ field }) => {
-                        const selectedTags = field.value || [];
-                        const handleTagSelect = (tagId: string) => {
-                            const isSelected = selectedTags.includes(tagId);
-                            const newTags = isSelected
-                                ? selectedTags.filter(id => id !== tagId)
-                                : [...selectedTags, tagId];
-                            field.onChange(newTags);
-                        }
-                        const handleTagRemove = (tagId: string) => {
-                            field.onChange(selectedTags.filter(id => id !== tagId));
-                        }
-                        return (
-                            <FormItem>
-                                <FormLabel>{t('tags')}</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                className={cn(
-                                                    "w-full h-auto justify-between",
-                                                    !selectedTags.length && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <div className="flex gap-1 flex-wrap">
-                                                    {selectedTags.map((tagId) => {
-                                                        const tag = allTags?.find(t => t.id === tagId);
-                                                        return tag ? (
-                                                            <Badge
-                                                                variant="secondary"
-                                                                key={tagId}
-                                                                className="mr-1"
-                                                                onClick={(e) => { e.stopPropagation(); handleTagRemove(tagId); }}
-                                                            >
-                                                                {tag.name}
-                                                                <span className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                                                >
-                                                                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                                                                </span>
-                                                            </Badge>
-                                                        ) : null;
-                                                    })}
-                                                    {selectedTags.length === 0 && t('transactions.form.tags.placeholder')}
-                                                </div>
-                                                <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                        <Command>
-                                            <CommandInput placeholder={t('transactions.form.tags.search_placeholder')} />
-                                            <CommandList>
-                                                <CommandEmpty>{t('transactions.form.tags.empty')}</CommandEmpty>
-                                                <CommandGroup>
-                                                    {allTags?.map((tag) => (
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('tags')}</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            className={cn(
+                                                "w-full h-auto justify-between",
+                                                !field.value?.length && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <div className="flex gap-1 flex-wrap">
+                                                {field.value?.map((tagId) => {
+                                                    const tag = allTags?.find(t => t.id === tagId);
+                                                    return tag ? (
+                                                        <Badge
+                                                            variant="secondary"
+                                                            key={tag.id}
+                                                            className="mr-1"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                const newValue = field.value?.filter((id) => id !== tagId);
+                                                                field.onChange(newValue);
+                                                            }}
+                                                        >
+                                                            {tag.name}
+                                                            <X className="ml-1 h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                                        </Badge>
+                                                    ) : null;
+                                                })}
+                                                {field.value?.length === 0 && t('transactions.form.tags.placeholder')}
+                                            </div>
+                                            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                    <Command>
+                                        <CommandInput placeholder={t('transactions.form.tags.search_placeholder')} />
+                                        <CommandList>
+                                            <CommandEmpty>{t('transactions.form.tags.empty')}</CommandEmpty>
+                                            <CommandGroup>
+                                                {allTags?.map((tag) => {
+                                                    const isSelected = field.value?.includes(tag.id) || false;
+                                                    return (
                                                         <CommandItem
                                                             key={tag.id}
                                                             value={tag.name}
-                                                            onSelect={() => handleTagSelect(tag.id)}
+                                                            onSelect={() => {
+                                                                if (isSelected) {
+                                                                    field.onChange(field.value?.filter((id) => id !== tag.id));
+                                                                } else {
+                                                                    field.onChange([...(field.value || []), tag.id]);
+                                                                }
+                                                            }}
                                                         >
                                                             <Check
                                                                 className={cn(
                                                                     "mr-2 h-4 w-4",
-                                                                    selectedTags.includes(tag.id) ? "opacity-100" : "opacity-0"
+                                                                    isSelected ? "opacity-100" : "opacity-0"
                                                                 )}
                                                             />
                                                             {tag.name}
                                                         </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                            </FormItem>
-                        );
-                    }}
+                                                    )
+                                                })}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
 
 
@@ -569,3 +567,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
+
+    
