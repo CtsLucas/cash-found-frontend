@@ -8,7 +8,7 @@ export type Transaction = {
   deduction?: number;
   type: 'income' | 'expense';
   category: string; 
-  tags?: string[];
+  tagId?: string;
   userId?: string;
   cardId?: string;
   invoiceMonth?: string;

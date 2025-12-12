@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -17,22 +16,19 @@ import { cn } from "@/lib/utils";
 type Option = Record<"value" | "label", string>;
 
 interface MultiSelectProps {
-    options: Option[];
-    selected: string[];
-    onChange: (value: string[]) => void;
-    placeholder?: string;
-    searchPlaceholder?: string;
-    emptyPlaceholder?: string;
-    className?: string;
+  options: Option[];
+  selected: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+  className?: string;
 }
 
-export function MultiSelect({ 
-    options, 
-    selected, 
-    onChange, 
-    placeholder = "Select...",
-    className,
-    ...props
+export function MultiSelect({
+  options,
+  selected,
+  onChange,
+  placeholder = "Selecione...",
+  className,
 }: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
@@ -53,9 +49,19 @@ export function MultiSelect({
       }
       if (e.key === "Escape") {
         input.blur();
+        setOpen(false);
       }
     }
   }, [handleUnselect, selected]);
+
+  const handleSelect = React.useCallback((value: string) => {
+    setInputValue("");
+    onChange([...selected, value]);
+    // Mantém o foco no input após selecionar
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  }, [onChange, selected]);
 
   const selectables = options.filter(option => !selected.includes(option.value));
 
@@ -66,8 +72,8 @@ export function MultiSelect({
       >
         <div className="flex gap-1 flex-wrap">
           {selected.map((value) => {
-             const option = options.find(o => o.value === value);
-             if (!option) return null;
+            const option = options.find(o => o.value === value);
+            if (!option) return null;
             return (
               <Badge key={value} variant="secondary">
                 {option.label}
@@ -93,42 +99,42 @@ export function MultiSelect({
             ref={inputRef}
             value={inputValue}
             onValueChange={setInputValue}
-            onBlur={() => setOpen(false)}
+            onBlur={() => {
+              // Delay para permitir que o click seja processado primeiro
+              setTimeout(() => setOpen(false), 200);
+            }}
             onFocus={() => setOpen(true)}
             placeholder={placeholder}
             className={cn(
-                "ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1",
-                selected.length > 0 ? 'w-auto' : 'w-full'
+              "ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1",
+              selected.length > 0 ? 'w-auto' : 'w-full'
             )}
           />
         </div>
       </div>
       <div className="relative mt-2">
         <CommandList>
-        {open && selectables.length > 0 ? (
-          <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-            <CommandGroup className="h-full overflow-auto">
-              {selectables.map((option) => {
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onSelect={() => {
-                      setInputValue("");
-                      onChange([...selected, option.value]);
-                    }}
-                    className={"cursor-pointer"}
-                  >
-                    {option.label}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </div>
-        ) : null}
+          {open && selectables.length > 0 ? (
+            <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+              <CommandGroup className="h-full overflow-auto max-h-64">
+                {selectables.map((option) => {
+                  return (
+                    <CommandItem
+                      key={option.value}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onSelect={() => handleSelect(option.value)}
+                      className="cursor-pointer"
+                    >
+                      {option.label}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </div>
+          ) : null}
         </CommandList>
       </div>
     </Command>

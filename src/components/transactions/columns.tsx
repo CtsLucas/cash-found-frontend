@@ -87,28 +87,23 @@ export const columns = (onEdit: (transaction: Transaction) => void, t: TFunction
     },
   },
   {
-    accessorKey: "tags",
-    header: () => <div className="text-center">{t('tags')}</div>,
+    accessorKey: "tagId",
+    header: () => <div className="text-center">{t('tag')}</div>,
     cell: ({ row, table }) => {
-        const tagIds = row.getValue("tags") as string[] | undefined;
+        const tagId = row.getValue("tagId") as string | undefined;
         const { tags } = (table.options.meta as { tags: Tag[] })
         
-        if (!tagIds || tagIds.length === 0) {
+        if (!tagId) {
             return <div className="text-center text-muted-foreground">-</div>;
         }
 
-        const tagNames = tagIds.map(tagId => {
-            const tag = tags?.find(t => t.id === tagId);
-            return tag ? tag.name : '';
-        }).filter(name => name);
-
-        return (
-            <div className="flex justify-center space-x-1">
-                {tagNames.map(name => (
-                    <Badge key={name} variant="secondary">{name}</Badge>
-                ))}
+        const tag = tags?.find(t => t.id === tagId);
+        
+        return tag ? (
+            <div className="text-center">
+                <Badge variant="secondary">{tag.name}</Badge>
             </div>
-        )
+        ) : <div className="text-center text-muted-foreground">-</div>;
     }
   },
   {
