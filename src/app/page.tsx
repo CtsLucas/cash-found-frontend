@@ -1,13 +1,48 @@
+
+'use client';
+
 import Image from 'next/image';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { placeholderImages } from '@/lib/placeholder-images';
+import { initiateGoogleSignIn, useAuth, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { doc } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function LoginPage() {
   const loginImage = placeholderImages.find(image => image.id === 'login-illustration');
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      const userRef = doc(firestore, 'users', user.uid);
+      const userData = {
+        id: user.uid,
+        googleId: user.providerData.find(p => p.providerId === 'google.com')?.uid,
+        email: user.email,
+        name: user.displayName,
+      };
+      setDocumentNonBlocking(userRef, userData, { merge: true });
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router, firestore]);
+
+  const handleGoogleLogin = () => {
+    initiateGoogleSignIn(auth);
+  };
+
+  if (isUserLoading || user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
@@ -16,43 +51,12 @@ export default function LoginPage() {
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold font-headline">FinanceFlow</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your email below to login to your account
+              Sign in to manage your finances
             </p>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription>
-                Don't have an account?{' '}
-                <Link href="#" className="underline">
-                  Sign up
-                </Link>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="m@example.com" required />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <Link href="#" className="ml-auto inline-block text-sm underline">
-                      Forgot your password?
-                    </Link>
-                  </div>
-                  <Input id="password" type="password" required />
-                </div>
-                <Link href="/dashboard" className="w-full">
-                  <Button className="w-full">Login</Button>
-                </Link>
-                <Button variant="outline" className="w-full">
-                  Login with Google
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
+            Login with Google
+          </Button>
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
@@ -70,3 +74,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
