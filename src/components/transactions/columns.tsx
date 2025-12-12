@@ -122,12 +122,21 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     accessorKey: "installments",
     header: () => <div className="text-center">Installments</div>,
     cell: ({ row }) => {
-      const installments = row.getValue("installments") as number | undefined;
-
+      const installments = row.original.installments as number | undefined;
+      const currentInstallment = row.original.currentInstallment as number | undefined;
+      
       if (!installments || installments <= 1) {
         return <div className="text-center text-muted-foreground">-</div>;
       }
       
+      if (currentInstallment) {
+        return (
+            <div className="text-center">
+                {currentInstallment}/{installments}
+            </div>
+        )
+      }
+
       return (
         <div className="text-center">
             {installments}

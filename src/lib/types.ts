@@ -13,6 +13,7 @@ export type Transaction = {
   cardId?: string;
   invoiceMonth?: string;
   installments?: number;
+  currentInstallment?: number;
 };
 
 export type Category = {

@@ -49,6 +49,7 @@ const transactionSchema = z.object({
     cardId: z.string().optional(),
     invoiceMonth: z.string().optional(),
     installments: z.coerce.number().min(1).optional(),
+    currentInstallment: z.coerce.number().optional(),
     userId: z.string()
 });
 
@@ -200,10 +201,11 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 id: newTransactionRef.id,
                 amount: installmentAmount,
                 deduction: 0, // Deduction is applied once to the total amount before splitting
-                description: `${data.description} (${i + 1}/${installmentCount})`,
+                description: data.description,
                 date: format(installmentDate, 'yyyy-MM-dd'),
                 invoiceMonth: format(invoiceDate, 'MMMM yyyy'),
                 installments: installmentCount,
+                currentInstallment: i + 1,
             };
             batch.set(newTransactionRef, installmentTransaction);
         }
@@ -392,18 +394,14 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                         key={tag.id}
                                                         value={tag.id}
                                                         onSelect={(currentValue) => {
-                                                          const tagId = currentValue;
-                                                          if (!tagId) return;
-
-                                                          const selectedTags = field.value || [];
-                                                          const isSelected = selectedTags.includes(tagId);
-                                                          
-                                                          if (isSelected) {
-                                                              field.onChange(selectedTags.filter(id => id !== tagId));
-                                                          } else {
-                                                              field.onChange([...selectedTags, tagId]);
-                                                          }
-                                                          setOpenTags(true); // Keep the popover open
+                                                            const selectedTags = field.value || [];
+                                                            const isSelected = selectedTags.includes(currentValue);
+                                                            if (isSelected) {
+                                                                field.onChange(selectedTags.filter(id => id !== currentValue));
+                                                            } else {
+                                                                field.onChange([...selectedTags, currentValue]);
+                                                            }
+                                                            setOpenTags(true);
                                                         }}
                                                     >
                                                         {tag.name}
@@ -508,5 +506,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
-
-    
