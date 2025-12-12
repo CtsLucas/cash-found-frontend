@@ -1,16 +1,17 @@
 
 'use client'
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AddCardSheet } from "@/components/cards/add-card-sheet";
 import { Card as UICard, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
-import { Nfc, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AddCardSheet } from "@/components/cards/add-card-sheet";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -20,6 +21,9 @@ const formatCurrency = (amount: number) => {
   };
 
 function InvoicesList({ cardId, transactions }: { cardId: string, transactions: Transaction[] | null }) {
+    const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+    const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+
     const invoices = useMemo(() => {
         if (!transactions) return {};
         return transactions
@@ -43,46 +47,76 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
         return Object.keys(invoices).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
     }, [invoices]);
 
+    useMemo(() => {
+        if (sortedInvoiceMonths.length > 0 && !selectedInvoice) {
+            setSelectedInvoice(sortedInvoiceMonths[0]);
+        }
+    }, [sortedInvoiceMonths, selectedInvoice]);
+
+    const handleInvoiceSelect = (month: string) => {
+        const index = sortedInvoiceMonths.findIndex(m => m === month);
+        if (carouselApi && index !== -1) {
+            carouselApi.scrollTo(index);
+        }
+        setSelectedInvoice(month);
+    }
+    
     if (sortedInvoiceMonths.length === 0) {
         return <p className="text-muted-foreground text-center p-4">No invoices found for this card.</p>
     }
 
+    const selectedTransactions = selectedInvoice ? invoices[selectedInvoice]?.transactions : [];
+
     return (
-        <Accordion type="single" collapsible className="w-full">
-            {sortedInvoiceMonths.map(month => {
-                const invoice = invoices[month];
-                return (
-                    <AccordionItem value={month} key={month}>
-                        <AccordionTrigger>
-                            <div className="flex justify-between w-full pr-4">
-                                <span>{new Date(month).toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-                                <span className="text-right font-medium">{formatCurrency(invoice.total)}</span>
+       <div className="flex flex-col gap-4">
+         <Carousel setApi={setCarouselApi} className="w-full">
+            <CarouselContent>
+                {sortedInvoiceMonths.map(month => {
+                    const invoice = invoices[month];
+                    const isSelected = selectedInvoice === month;
+                    return (
+                        <CarouselItem key={month} className="md:basis-1/2 lg:basis-1/3">
+                            <div className="p-1">
+                                <UICard 
+                                    className={cn("cursor-pointer", isSelected && "border-primary")}
+                                    onClick={() => handleInvoiceSelect(month)}
+                                >
+                                    <CardHeader className="flex flex-row items-center justify-between p-4">
+                                        <CardTitle className="text-base">{new Date(month).toLocaleString('default', { month: 'long', year: 'numeric' })}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-4 pt-0">
+                                        <div className="text-2xl font-bold">{formatCurrency(invoice.total)}</div>
+                                    </CardContent>
+                                </UICard>
                             </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                           <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {invoice.transactions.map(t => (
-                                    <TableRow key={t.id}>
-                                        <TableCell>{new Date(t.date).toLocaleDateString()}</TableCell>
-                                        <TableCell>{t.description}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(t.amount - (t.deduction || 0))}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                           </Table>
-                        </AccordionContent>
-                    </AccordionItem>
-                )
-            })}
-        </Accordion>
+                        </CarouselItem>
+                    )
+                })}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+        </Carousel>
+        {selectedTransactions && selectedTransactions.length > 0 && (
+             <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {selectedTransactions.map(t => (
+                        <TableRow key={t.id}>
+                            <TableCell>{new Date(t.date).toLocaleDateString()}</TableCell>
+                            <TableCell>{t.description}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(t.amount - (t.deduction || 0))}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        )}
+       </div>
     )
 }
 
@@ -163,7 +197,6 @@ export default function CardsPage() {
                             </header>
                             
                             <div className="flex items-center gap-3">
-                                <Nfc size={28} className="text-yellow-400 opacity-90" />
                                 <div>
                                     <p className="text-xs opacity-80">Available Limit</p>
                                     <p className="text-xl font-bold tracking-tight">{formatCurrency(availableLimit)}</p>
@@ -193,7 +226,7 @@ export default function CardsPage() {
             <UICard>
                 <CardHeader>
                     <CardTitle>Invoices for {cards?.find(c => c.id === selectedCardId)?.cardName}</CardTitle>
-                    <CardDescription>Click on an invoice to see its transactions.</CardDescription>
+                    <CardDescription>Select an invoice to see its transactions.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoadingTransactions ? <p>Loading invoices...</p> : <InvoicesList cardId={selectedCardId} transactions={allTransactions} />}
