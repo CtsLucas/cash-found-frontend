@@ -17,7 +17,7 @@ import { collection, query, where, orderBy } from "firebase/firestore"
 import { useMemo, useState } from "react"
 import { Transaction } from "@/lib/types"
 import { MonthYearPicker } from "@/components/transactions/month-year-picker"
-import { startOfMonth, endOfMonth, format } from "date-fns"
+import { startOfMonth, endOfMonth, format, addMonths } from "date-fns"
 import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
 import { EmptyState } from "@/components/empty-state"
   
@@ -32,15 +32,15 @@ import { EmptyState } from "@/components/empty-state"
         if (!user) return null;
 
         const start = startOfMonth(currentDate);
-        const end = endOfMonth(currentDate);
+        const nextMonthStart = startOfMonth(addMonths(currentDate, 1));
         
         const startDate = format(start, 'yyyy-MM-dd');
-        const endDate = format(end, 'yyyy-MM-dd');
+        const endDate = format(nextMonthStart, 'yyyy-MM-dd');
 
         let q = query(
           collection(firestore, `users/${user.uid}/transactions`),
           where('date', '>=', startDate),
-          where('date', '<=', endDate),
+          where('date', '<', endDate),
           orderBy('date', 'desc')
         );
 

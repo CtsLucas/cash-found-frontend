@@ -9,7 +9,7 @@ import { useState, useMemo } from "react";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, query, where, orderBy } from "firebase/firestore";
 import { Transaction } from "@/lib/types";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, endOfMonth, format, addMonths } from "date-fns";
 
 export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -20,15 +20,15 @@ export default function DashboardPage() {
     if (!user) return null;
 
     const start = startOfMonth(currentDate);
-    const end = endOfMonth(currentDate);
+    const nextMonthStart = startOfMonth(addMonths(currentDate, 1));
     
     const startDate = format(start, 'yyyy-MM-dd');
-    const endDate = format(end, 'yyyy-MM-dd');
+    const endDate = format(nextMonthStart, 'yyyy-MM-dd');
 
     let q = query(
       collection(firestore, `users/${user.uid}/transactions`),
       where('date', '>=', startDate),
-      where('date', '<=', endDate)
+      where('date', '<', endDate)
     );
 
     return q;
