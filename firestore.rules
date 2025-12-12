@@ -143,14 +143,11 @@ service cloud.firestore {
        * @principle Enforces strict data ownership within a user's private data tree.
        */
       match /transactions/{transactionId} {
-        allow get: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();
         allow delete: if isExistingOwner(userId);
       }
-
-      // This rule is required to allow collection queries.
-      allow list: if isOwner(userId);
 
       /**
        * @description Manages user-specific categories for transactions.
