@@ -13,6 +13,9 @@ import { AddCardSheet } from "@/components/cards/add-card-sheet";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { add, format } from "date-fns";
+import { EmptyState } from "@/components/empty-state";
+import { PlusCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -135,6 +138,14 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
     )
 }
 
+const CardsSkeleton = () => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="w-full aspect-[85.6/53.98] rounded-xl" />
+        ))}
+    </div>
+)
+
 
 export default function CardsPage() {
     const firestore = useFirestore();
@@ -184,7 +195,6 @@ export default function CardsPage() {
         }
     }
 
-
   return (
     <div className="flex flex-col gap-4">
         <div className="flex items-center">
@@ -193,50 +203,62 @@ export default function CardsPage() {
                 <AddCardSheet isOpen={isSheetOpen && !editingCard} onOpenChange={handleSheetOpenChange} />
             </div>
         </div>
-        {isLoadingCards && <p>Loading cards...</p>}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {cards?.map(card => {
-                const spending = getCardSpending(card.id);
-                const availableLimit = card.limit - spending;
-                const isSelected = selectedCardId === card.id;
+        {isLoadingCards ? <CardsSkeleton /> : (
+            cards && cards.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {cards?.map(card => {
+                        const spending = getCardSpending(card.id);
+                        const availableLimit = card.limit - spending;
+                        const isSelected = selectedCardId === card.id;
 
-                return (
-                    <div key={card.id}>
-                        <div 
-                            className="w-full aspect-[85.6/53.98] rounded-xl p-4 flex flex-col justify-between text-white shadow-lg cursor-pointer transition-all duration-300 relative group" 
-                            style={{ backgroundColor: card.color, transform: isSelected ? 'scale(1.05)' : 'scale(1)', zIndex: isSelected ? 10 : 1 }}
-                            onClick={() => toggleCardSelection(card.id)}
-                        >
-                            <header className="flex justify-between items-start">
-                                <span className="text-lg font-semibold tracking-wider">{card.cardName}</span>
-                            </header>
-                            
-                            <div className="flex items-center gap-3">
-                                <div>
-                                    <p className="text-xs opacity-80">Available Limit</p>
-                                    <p className="text-xl font-bold tracking-tight">{formatCurrency(availableLimit)}</p>
+                        return (
+                            <div key={card.id}>
+                                <div 
+                                    className="w-full aspect-[85.6/53.98] rounded-xl p-4 flex flex-col justify-between text-white shadow-lg cursor-pointer transition-all duration-300 relative group" 
+                                    style={{ backgroundColor: card.color, transform: isSelected ? 'scale(1.05)' : 'scale(1)', zIndex: isSelected ? 10 : 1 }}
+                                    onClick={() => toggleCardSelection(card.id)}
+                                >
+                                    <header className="flex justify-between items-start">
+                                        <span className="text-lg font-semibold tracking-wider">{card.cardName}</span>
+                                    </header>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <div>
+                                            <p className="text-xs opacity-80">Available Limit</p>
+                                            <p className="text-xl font-bold tracking-tight">{formatCurrency(availableLimit)}</p>
+                                        </div>
+                                    </div>
+                                    <AddCardSheet isOpen={isSheetOpen && editingCard?.id === card.id} onOpenChange={handleSheetOpenChange} editingCard={editingCard}>
+                                        <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute top-2 right-2 h-7 w-7 text-white"
+                                        onClick={(e) => { e.stopPropagation(); handleEditCard(card); }}
+                                        >
+                                        <Pencil size={16} />
+                                        </Button>
+                                    </AddCardSheet>
+
+                                    <footer className="flex justify-between items-end text-xs">
+                                        <span>Due: {new Date(card.dueDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}</span>
+                                        <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
+                                    </footer>
                                 </div>
                             </div>
-                             <AddCardSheet isOpen={isSheetOpen && editingCard?.id === card.id} onOpenChange={handleSheetOpenChange} editingCard={editingCard}>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="absolute top-2 right-2 h-7 w-7 text-white"
-                                  onClick={(e) => { e.stopPropagation(); handleEditCard(card); }}
-                                >
-                                  <Pencil size={16} />
-                                </Button>
-                              </AddCardSheet>
-
-                            <footer className="flex justify-between items-end text-xs">
-                                <span>Due: {new Date(card.dueDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}</span>
-                                <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
-                            </footer>
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
+                        )
+                    })}
+                </div>
+            ) : (
+                <EmptyState
+                    icon={PlusCircle}
+                    title="No cards added yet"
+                    description="Get started by adding your first credit or debit card to manage your finances."
+                >
+                    <AddCardSheet />
+                </EmptyState>
+            )
+        )}
+        
         {selectedCardId && (
             <UICard>
                 <CardHeader>

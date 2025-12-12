@@ -17,6 +17,8 @@ import { Category, Tag } from "@/lib/types"
 import { collection } from "firebase/firestore"
 import { useState } from "react"
 import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
+import { EmptyState } from "@/components/empty-state"
+import { PlusCircle } from "lucide-react"
   
 export default function ManagementPage() {
     const firestore = useFirestore();
@@ -85,7 +87,24 @@ return (
                         editingItem={editingCategory}
                     />
                 </div>
-                {isLoadingCategories ? <DataTableSkeleton columnCount={3} /> : <DataTable columns={categoryColumns(handleEditCategory)} data={categories || []} />}
+                {isLoadingCategories ? <DataTableSkeleton columnCount={3} /> : (
+                    (categories && categories.length > 0) ? (
+                        <DataTable columns={categoryColumns(handleEditCategory)} data={categories} />
+                    ) : (
+                        <EmptyState
+                            icon={PlusCircle}
+                            title="No categories created"
+                            description="Get started by creating your first category."
+                        >
+                            <AddItemSheet 
+                                itemType="Category"
+                                isOpen={isCategorySheetOpen}
+                                onOpenChange={handleCategorySheetOpenChange}
+                                editingItem={editingCategory}
+                            />
+                        </EmptyState>
+                    )
+                )}
               </ClientOnly>
             </TabsContent>
             <TabsContent value="tags">
@@ -98,7 +117,24 @@ return (
                         editingItem={editingTag}
                     />
                 </div>
-                {isLoadingTags ? <DataTableSkeleton columnCount={3} /> : <DataTable columns={tagColumns(handleEditTag)} data={tags || []} />}
+                {isLoadingTags ? <DataTableSkeleton columnCount={3} /> : (
+                    (tags && tags.length > 0) ? (
+                        <DataTable columns={tagColumns(handleEditTag)} data={tags} />
+                    ) : (
+                        <EmptyState
+                            icon={PlusCircle}
+                            title="No tags created"
+                            description="Get started by creating your first tag."
+                        >
+                            <AddItemSheet
+                                itemType="Tag"
+                                isOpen={isTagSheetOpen}
+                                onOpenChange={handleTagSheetOpenChange}
+                                editingItem={editingTag}
+                            />
+                        </EmptyState>
+                    )
+                )}
               </ClientOnly>
             </TabsContent>
         </Tabs>

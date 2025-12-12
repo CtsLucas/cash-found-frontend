@@ -3,6 +3,7 @@
 
 import {
     File,
+    PlusCircle,
   } from "lucide-react"
   
   import { Button } from "@/components/ui/button"
@@ -18,6 +19,7 @@ import { Transaction } from "@/lib/types"
 import { MonthYearPicker } from "@/components/transactions/month-year-picker"
 import { startOfMonth, endOfMonth, format } from "date-fns"
 import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
+import { EmptyState } from "@/components/empty-state"
   
   export default function TransactionsPage() {
     const firestore = useFirestore();
@@ -78,7 +80,19 @@ import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton
             </div>
             <div>
                 <ClientOnly>
-                  {isLoading ? <DataTableSkeleton columnCount={columns(handleEdit).length} /> : <DataTable columns={columns(handleEdit)} data={transactions || []} />}
+                  {isLoading ? <DataTableSkeleton columnCount={columns(handleEdit).length} /> : 
+                    (transactions && transactions.length > 0) ? (
+                      <DataTable columns={columns(handleEdit)} data={transactions} />
+                    ) : (
+                      <EmptyState
+                        icon={PlusCircle}
+                        title="No transactions found"
+                        description="Get started by adding your first transaction for this period."
+                      >
+                         <AddTransactionSheet isOpen={isSheetOpen} onOpenChange={handleSheetOpenChange} editingTransaction={editingTransaction} />
+                      </EmptyState>
+                    )
+                  }
                 </ClientOnly>
             </div>
         </>
