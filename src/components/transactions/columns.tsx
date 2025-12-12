@@ -9,7 +9,7 @@ import { DataTableRowActions } from "./data-table-row-actions"
 import { useState, useEffect, useMemo } from "react"
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
 import { collection } from "firebase/firestore"
-import { Category, Tag } from "@/lib/types"
+import { Category, Tag, Card } from "@/lib/types"
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -112,7 +112,7 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
       const finalAmount = amount - (deduction || 0)
       
       return (
-        <div className="text-right font-medium text-red-500">
+        <div className="text-right font-medium text-destructive">
             {deduction ? (
                 <div>
                     <span>-{formatCurrency(finalAmount)}</span>
@@ -126,6 +126,24 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         </div>
       )
     },
+  },
+  {
+    accessorKey: "cardId",
+    header: "Card",
+    cell: ({ row, table }) => {
+        const cardId = row.getValue("cardId") as string;
+        const { cards } = (table.options.meta as { cards: Card[] })
+        
+        if (!cardId) {
+            return null;
+        }
+
+        const card = cards?.find(c => c.id === cardId);
+
+        return (
+            <div>{card ? `${card.cardName} - ${card.last4}` : ''}</div>
+        )
+    }
   },
   {
     accessorKey: "date",

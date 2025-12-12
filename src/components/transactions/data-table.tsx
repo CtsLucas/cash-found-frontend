@@ -29,7 +29,7 @@ import {
 import { DataTablePagination } from "./data-table-pagination"
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
 import { collection } from "firebase/firestore"
-import { Category, Tag } from "@/lib/types"
+import { Category, Tag, Card } from "@/lib/types"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -62,6 +62,12 @@ export function DataTable<TData, TValue>({
     return collection(firestore, `users/${user.uid}/tags`);
   }, [firestore, user]);
   const { data: tags } = useCollection<Tag>(tagsQuery);
+  
+  const cardsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, `users/${user.uid}/cards`);
+  }, [firestore, user]);
+  const { data: cards } = useCollection<Card>(cardsQuery);
 
   const table = useReactTable({
     data,
@@ -74,7 +80,8 @@ export function DataTable<TData, TValue>({
     },
     meta: {
       categories,
-      tags
+      tags,
+      cards,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
