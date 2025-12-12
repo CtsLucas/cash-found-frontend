@@ -36,7 +36,7 @@ const MonthlyDebitsSkeleton = () => {
             <TableHeader>
                 <TableRow>
                     <TableHead>Description</TableHead>
-                    <TableHead className="text-center">Date</TableHead>
+                    <TableHead className="text-center">Date / Vencimento</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
             </TableHeader>
@@ -118,7 +118,7 @@ export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Description</TableHead>
-                        <TableHead className="text-center">Date</TableHead>
+                        <TableHead className="text-center">Date / Vencimento</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -155,4 +155,3 @@ export function MonthlyDebits({ transactions, isLoading }: MonthlyDebitsProps) {
     </Card>
   );
 }
-
