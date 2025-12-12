@@ -27,6 +27,7 @@ import { Tag } from "@/lib/types"
 import { useFirestore, useUser } from "@/firebase"
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { doc } from "firebase/firestore"
+import { useState } from "react"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -40,16 +41,18 @@ export function DataTableRowActions<TData extends Tag>({
   const item = row.original
   const firestore = useFirestore();
   const { user } = useUser();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = () => {
     if (user) {
       const itemRef = doc(firestore, `users/${user.uid}/tags/${item.id}`);
       deleteDocumentNonBlocking(itemRef);
+      setIsDeleteDialogOpen(false);
     }
   }
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DropdownMenu>
         <DropdownMenuTrigger asChild>
             <Button
@@ -64,7 +67,7 @@ export function DataTableRowActions<TData extends Tag>({
             <DropdownMenuItem onClick={() => onEdit(item)}>Edit</DropdownMenuItem>
             <DropdownMenuSeparator />
             <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>Delete</DropdownMenuItem>
             </AlertDialogTrigger>
         </DropdownMenuContent>
         </DropdownMenu>
