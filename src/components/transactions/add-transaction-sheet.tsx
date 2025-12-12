@@ -492,7 +492,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                             <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select an invoice month" />
-                                            </Trigger>
+                                            </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 {invoiceMonths.map(month => <SelectItem key={month} value={month}>{month}</SelectItem>)}
@@ -518,3 +518,5 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
+    
