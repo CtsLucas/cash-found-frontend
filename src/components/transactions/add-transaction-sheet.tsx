@@ -344,14 +344,15 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                 {tags?.map((tag) => (
                                                     <CommandItem
                                                         key={tag.id}
-                                                        onSelect={() => {
-                                                          const currentValue = field.value || [];
-                                                          const isSelected = currentValue.includes(tag.id);
-                                                          if (isSelected) {
-                                                            field.onChange(currentValue.filter(id => id !== tag.id));
-                                                          } else {
-                                                            field.onChange([...currentValue, tag.id]);
-                                                          }
+                                                        value={tag.id}
+                                                        onSelect={(currentValue) => {
+                                                            const selectedTags = field.value || [];
+                                                            const isSelected = selectedTags.includes(currentValue);
+                                                            if (isSelected) {
+                                                                field.onChange(selectedTags.filter(id => id !== currentValue));
+                                                            } else {
+                                                                field.onChange([...selectedTags, currentValue]);
+                                                            }
                                                         }}
                                                     >
                                                         {tag.name}
