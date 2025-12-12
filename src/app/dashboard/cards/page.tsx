@@ -210,7 +210,6 @@ export default function CardsPage() {
                         const spending = getCardSpending(card.id);
                         const availableLimit = card.limit - spending;
                         const isSelected = selectedCardId === card.id;
-                        const dueDate = typeof card.dueDate === 'number' ? setDate(new Date(), card.dueDate) : null;
 
                         return (
                             <div key={card.id}>
@@ -241,7 +240,7 @@ export default function CardsPage() {
                                     </AddCardSheet>
 
                                     <footer className="flex justify-between items-end text-xs">
-                                        <span>Due: {dueDate && isValid(dueDate) ? format(dueDate, 'dd/MM') : 'N/A'}</span>
+                                        <span>Due: {card.dueDate ?? 'N/A'}</span>
                                         <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
                                     </footer>
                                 </div>
