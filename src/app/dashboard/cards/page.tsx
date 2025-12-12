@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase";
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Wifi, Nfc } from "lucide-react";
 import { useMemo } from "react";
 import { AddCardSheet } from "@/components/cards/add-card-sheet";
 
@@ -53,7 +53,6 @@ export default function CardsPage() {
 
     const { data: cards, isLoading: isLoadingCards } = useCollection<CardType>(cardsQuery);
     
-    // We need all transactions to calculate spending per card
     const allTransactionsQuery = useMemoFirebase(() => {
         if (!user) return null;
         return query(collection(firestore, `users/${user.uid}/transactions`), where('type', '==', 'expense'));
@@ -77,28 +76,31 @@ export default function CardsPage() {
             </div>
         </div>
         {isLoadingCards && <p>Loading cards...</p>}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {cards?.map(card => {
                 const spending = getCardSpending(card.id);
                 const availableLimit = card.limit - spending;
-                const usagePercentage = card.limit > 0 ? (spending / card.limit) * 100 : 0;
 
                 return (
-                    <Card key={card.id} style={{ borderTopColor: card.color, borderTopWidth: '4px' }}>
-                        <CardHeader className="pb-2">
-                            <CardDescription>{card.cardName}</CardDescription>
-                            <CardTitle className="text-4xl">{formatCurrency(availableLimit)}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-xs text-muted-foreground">
-                                {formatCurrency(spending)} of {formatCurrency(card.limit)} used
+                    <div key={card.id} className="aspect-[85.6/53.98] rounded-xl p-6 flex flex-col justify-between text-white shadow-lg" style={{ backgroundColor: card.color }}>
+                        <header className="flex justify-between items-start">
+                            <span className="text-xl font-semibold tracking-wider">{card.cardName}</span>
+                            <Wifi size={24} className="opacity-80"/>
+                        </header>
+                        
+                        <div className="flex items-center gap-4">
+                            <Nfc size={36} className="text-yellow-400 opacity-90" />
+                            <div>
+                                <p className="text-sm opacity-80">Available Limit</p>
+                                <p className="text-2xl font-bold tracking-tight">{formatCurrency(availableLimit)}</p>
                             </div>
-                            <Progress value={usagePercentage} aria-label={`${usagePercentage.toFixed(0)}% used`} className="mt-2" />
-                        </CardContent>
-                        <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                            <span>Due: {new Date(card.dueDate).toLocaleDateString()}</span>
-                        </CardFooter>
-                    </Card>
+                        </div>
+
+                        <footer className="flex justify-between items-end text-sm">
+                            <span>Due: {new Date(card.dueDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}</span>
+                            <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
+                        </footer>
+                    </div>
                 )
             })}
         </div>

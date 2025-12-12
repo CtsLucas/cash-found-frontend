@@ -28,6 +28,7 @@ const cardSchema = z.object({
     cardName: z.string().min(1, "Card name is required"),
     limit: z.coerce.number().positive("Limit must be positive"),
     dueDate: z.string().min(1, "Due date is required"),
+    last4: z.string().length(4, "Must be 4 digits").regex(/^\d{4}$/, "Must be 4 digits"),
     color: z.string().optional(),
     userId: z.string()
 });
@@ -45,6 +46,7 @@ export function AddCardSheet() {
       cardName: "",
       limit: 0,
       dueDate: "",
+      last4: "",
       color: "#6b7280",
       userId: user?.uid
     },
@@ -56,6 +58,7 @@ export function AddCardSheet() {
             cardName: "",
             limit: 0,
             dueDate: "",
+            last4: "",
             color: "#6b7280",
             userId: user.uid
         });
@@ -130,19 +133,32 @@ export function AddCardSheet() {
                         )}
                     />
                     <FormField
+                        control={form.control}
+                        name="last4"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Last 4 digits</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="1234" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                 <FormField
                       control={form.control}
                       name="color"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Card Color</FormLabel>
                           <FormControl>
-                            <Input type="color" {...field} className="h-10 p-1"/>
+                            <Input type="color" {...field} className="h-10 p-1 w-full"/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                </div>
                 
                 <SheetFooter className="pt-4">
                     <SheetClose asChild>

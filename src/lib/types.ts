@@ -1,4 +1,5 @@
 
+
 export type Transaction = {
   id: string;
   date: string;
@@ -31,6 +32,7 @@ export type Card = {
   cardName: string;
   limit: number;
   dueDate: string;
+  last4: string;
   color?: string;
   userId?: string;
 };
