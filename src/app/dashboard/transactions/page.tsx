@@ -17,6 +17,7 @@ import { useMemo, useState } from "react"
 import { Transaction } from "@/lib/types"
 import { MonthYearPicker } from "@/components/transactions/month-year-picker"
 import { startOfMonth, endOfMonth, format } from "date-fns"
+import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
   
   export default function TransactionsPage() {
     const firestore = useFirestore();
@@ -77,7 +78,7 @@ import { startOfMonth, endOfMonth, format } from "date-fns"
             </div>
             <div>
                 <ClientOnly>
-                  {isLoading ? <p>Loading...</p> : <DataTable columns={columns(handleEdit)} data={transactions || []} />}
+                  {isLoading ? <DataTableSkeleton columnCount={columns(handleEdit).length} /> : <DataTable columns={columns(handleEdit)} data={transactions || []} />}
                 </ClientOnly>
             </div>
         </>

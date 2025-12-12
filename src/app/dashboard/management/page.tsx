@@ -16,6 +16,7 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebas
 import { Category, Tag } from "@/lib/types"
 import { collection } from "firebase/firestore"
 import { useState } from "react"
+import { DataTableSkeleton } from "@/components/transactions/data-table-skeleton"
   
 export default function ManagementPage() {
     const firestore = useFirestore();
@@ -84,7 +85,7 @@ return (
                         editingItem={editingCategory}
                     />
                 </div>
-                {isLoadingCategories ? <p>Loading...</p> : <DataTable columns={categoryColumns(handleEditCategory)} data={categories || []} />}
+                {isLoadingCategories ? <DataTableSkeleton columnCount={3} /> : <DataTable columns={categoryColumns(handleEditCategory)} data={categories || []} />}
               </ClientOnly>
             </TabsContent>
             <TabsContent value="tags">
@@ -97,7 +98,7 @@ return (
                         editingItem={editingTag}
                     />
                 </div>
-                {isLoadingTags ? <p>Loading...</p> : <DataTable columns={tagColumns(handleEditTag)} data={tags || []} />}
+                {isLoadingTags ? <DataTableSkeleton columnCount={3} /> : <DataTable columns={tagColumns(handleEditTag)} data={tags || []} />}
               </ClientOnly>
             </TabsContent>
         </Tabs>
