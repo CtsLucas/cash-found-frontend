@@ -24,6 +24,7 @@ import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-b
 import { collection, doc } from "firebase/firestore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card as CardType } from "@/lib/types";
+import { CurrencyInput } from "../ui/currency-input";
   
 const cardSchema = z.object({
     cardName: z.string().min(1, "Card name is required"),
@@ -100,6 +101,11 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
     setIsOpen(false);
   };
 
+  const handleCurrencyChange = (field: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, '');
+    field.onChange(Number(value) / 100);
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
         {children ? (
@@ -143,7 +149,11 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
                         <FormItem>
                             <FormLabel>Credit Limit</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="$10000" {...field} />
+                                <CurrencyInput
+                                    placeholder="$10,000.00"
+                                    {...field}
+                                    onChange={handleCurrencyChange(field)}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

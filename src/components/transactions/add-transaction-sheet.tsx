@@ -37,6 +37,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { add, format } from "date-fns";
+import { CurrencyInput } from "../ui/currency-input";
   
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -157,7 +158,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             form.reset(defaultValues);
         }
     }
-  }, [user, isOpen, editingTransaction, currentMonth]);
+  }, [user, isOpen, editingTransaction, currentMonth, form]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
@@ -224,6 +225,11 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   };
 
   const isEditing = !!editingTransaction;
+
+  const handleCurrencyChange = (field: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, '');
+    field.onChange(Number(value) / 100);
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -296,7 +302,11 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                             <FormItem>
                                 <FormLabel>Amount</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="$0.00" {...field} />
+                                    <CurrencyInput 
+                                        placeholder="$0.00"
+                                        {...field}
+                                        onChange={handleCurrencyChange(field)}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -310,7 +320,11 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                 <FormItem>
                                     <FormLabel>Deduction</FormLabel>
                                     <FormControl>
-                                        <Input type="number" placeholder="$0.00" {...field} />
+                                    <CurrencyInput 
+                                        placeholder="$0.00"
+                                        {...field}
+                                        onChange={handleCurrencyChange(field)}
+                                    />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
