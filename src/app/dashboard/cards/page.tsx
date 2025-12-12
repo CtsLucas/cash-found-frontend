@@ -3,14 +3,14 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AddCardSheet } from "@/components/cards/add-card-sheet";
-import { Badge } from "@/components/ui/badge";
 import { Card as UICard, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Card as CardType, Transaction } from "@/lib/types";
 import { collection, query, where } from "firebase/firestore";
-import { Wifi, Nfc, ChevronDown } from "lucide-react";
+import { Wifi, Nfc, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -55,7 +55,7 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
                     <AccordionItem value={month} key={month}>
                         <AccordionTrigger>
                             <div className="flex justify-between w-full pr-4">
-                                <span>{month}</span>
+                                <span>{new Date(month).toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
                                 <span className="text-right font-medium">{formatCurrency(invoice.total)}</span>
                             </div>
                         </AccordionTrigger>
@@ -91,6 +91,8 @@ export default function CardsPage() {
     const firestore = useFirestore();
     const { user } = useUser();
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+    const [editingCard, setEditingCard] = useState<CardType | null>(null);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     const cardsQuery = useMemoFirebase(() => {
         if (!user) return null;
@@ -120,6 +122,18 @@ export default function CardsPage() {
             setSelectedCardId(cardId);
         }
     }
+    
+    const handleEditCard = (card: CardType) => {
+        setEditingCard(card);
+        setIsSheetOpen(true);
+    };
+
+    const handleSheetOpenChange = (isOpen: boolean) => {
+        setIsSheetOpen(isOpen);
+        if (!isOpen) {
+            setEditingCard(null);
+        }
+    }
 
 
   return (
@@ -127,7 +141,7 @@ export default function CardsPage() {
         <div className="flex items-center">
             <h1 className="text-3xl font-bold tracking-tight font-headline">My Cards</h1>
             <div className="ml-auto flex items-center gap-2">
-                <AddCardSheet />
+                <AddCardSheet isOpen={isSheetOpen && !editingCard} onOpenChange={handleSheetOpenChange} />
             </div>
         </div>
         {isLoadingCards && <p>Loading cards...</p>}
@@ -140,7 +154,7 @@ export default function CardsPage() {
                 return (
                     <div key={card.id}>
                         <div 
-                            className="w-full aspect-[85.6/53.98] rounded-xl p-4 flex flex-col justify-between text-white shadow-lg cursor-pointer transition-all duration-300" 
+                            className="w-full aspect-[85.6/53.98] rounded-xl p-4 flex flex-col justify-between text-white shadow-lg cursor-pointer transition-all duration-300 relative group" 
                             style={{ backgroundColor: card.color, transform: isSelected ? 'scale(1.05)' : 'scale(1)', zIndex: isSelected ? 10 : 1 }}
                             onClick={() => toggleCardSelection(card.id)}
                         >
@@ -156,6 +170,16 @@ export default function CardsPage() {
                                     <p className="text-xl font-bold tracking-tight">{formatCurrency(availableLimit)}</p>
                                 </div>
                             </div>
+                             <AddCardSheet isOpen={isSheetOpen && editingCard?.id === card.id} onOpenChange={handleSheetOpenChange} editingCard={editingCard}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="absolute top-2 right-2 h-7 w-7 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={(e) => { e.stopPropagation(); handleEditCard(card); }}
+                                >
+                                  <Pencil size={16} />
+                                </Button>
+                              </AddCardSheet>
 
                             <footer className="flex justify-between items-end text-xs">
                                 <span>Due: {new Date(card.dueDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}</span>

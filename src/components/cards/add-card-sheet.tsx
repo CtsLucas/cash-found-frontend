@@ -20,9 +20,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useFirestore, useUser } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { collection } from "firebase/firestore";
+import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, doc } from "firebase/firestore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card as CardType } from "@/lib/types";
   
 const cardSchema = z.object({
     cardName: z.string().min(1, "Card name is required"),
@@ -35,10 +36,21 @@ const cardSchema = z.object({
 
 type CardFormValues = z.infer<typeof cardSchema>;
 
-export function AddCardSheet() {
+interface AddCardSheetProps {
+    children?: React.ReactNode;
+    isOpen?: boolean;
+    onOpenChange?: (isOpen: boolean) => void;
+    editingCard?: CardType | null;
+}
+
+export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setControlledIsOpen, editingCard, children }: AddCardSheetProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isInternalOpen, setInternalOpen] = React.useState(false);
+
+  const isEditing = !!editingCard;
+  const isOpen = controlledIsOpen ?? isInternalOpen;
+  const setIsOpen = setControlledIsOpen ?? setInternalOpen;
 
   const form = useForm<CardFormValues>({
     resolver: zodResolver(cardSchema),
@@ -54,40 +66,59 @@ export function AddCardSheet() {
 
   React.useEffect(() => {
     if (user) {
-        form.reset({
+        const defaultValues = {
             cardName: "",
             limit: 0,
             dueDate: "",
             last4: "",
             color: "#6b7280",
             userId: user.uid
-        });
+        };
+
+        if (isEditing && editingCard) {
+            form.reset({
+                ...editingCard,
+                dueDate: editingCard.dueDate ? new Date(editingCard.dueDate).toISOString().split('T')[0] : '',
+            });
+        } else {
+            form.reset(defaultValues);
+        }
     }
-  }, [user, form, isOpen]);
+  }, [user, form, isOpen, editingCard, isEditing]);
 
   const onSubmit = (data: CardFormValues) => {
     if (!user) return;
-    const cardsCollection = collection(firestore, `users/${user.uid}/cards`);
-    addDocumentNonBlocking(cardsCollection, data);
+    
+    if (isEditing && editingCard?.id) {
+        const cardRef = doc(firestore, `users/${user.uid}/cards/${editingCard.id}`);
+        setDocumentNonBlocking(cardRef, data, { merge: true });
+    } else {
+        const cardsCollection = collection(firestore, `users/${user.uid}/cards`);
+        addDocumentNonBlocking(cardsCollection, data);
+    }
+    
     setIsOpen(false);
-    form.reset();
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button size="sm" className="h-8 gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Card
-          </span>
-        </Button>
-      </SheetTrigger>
+        {children ? (
+             <SheetTrigger asChild>{children}</SheetTrigger>
+        ) : (
+            <SheetTrigger asChild>
+                <Button size="sm" className="h-8 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Add Card
+                </span>
+                </Button>
+            </SheetTrigger>
+        )}
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Add a new card</SheetTitle>
+          <SheetTitle>{isEditing ? 'Edit Card' : 'Add a new card'}</SheetTitle>
           <SheetDescription>
-            Fill in the details below to add a new card to your wallet.
+            {isEditing ? 'Update the details of your card.' : 'Fill in the details below to add a new card to your wallet.'}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
