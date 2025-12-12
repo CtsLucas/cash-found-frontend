@@ -77,9 +77,11 @@ export function AddCardSheet({ isOpen: controlledIsOpen, onOpenChange: setContro
         };
 
         if (isEditing && editingCard) {
+            // Firestore date is a string 'YYYY-MM-DD', which is what the input expects.
+            // No conversion is needed.
             form.reset({
                 ...editingCard,
-                dueDate: editingCard.dueDate ? new Date(editingCard.dueDate).toISOString().split('T')[0] : '',
+                dueDate: editingCard.dueDate || '',
             });
         } else {
             form.reset(defaultValues);

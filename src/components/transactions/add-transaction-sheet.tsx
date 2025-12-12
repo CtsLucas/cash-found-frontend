@@ -148,9 +148,11 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         };
 
         if (editingTransaction) {
+            // The date from firestore is already in 'YYYY-MM-DD' format,
+            // which is exactly what the <input type="date"> needs. No conversion necessary.
             form.reset({
               ...editingTransaction,
-              date: editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : '',
+              date: editingTransaction.date || '',
               tags: editingTransaction.tags || [],
               cardId: editingTransaction.cardId || "",
               invoiceMonth: editingTransaction.invoiceMonth || currentMonth,
@@ -192,7 +194,12 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         
         const installmentAmount = calculatedAmount / installmentCount;
         const startingInvoiceDate = data.invoiceMonth ? new Date(data.invoiceMonth) : new Date();
-        const originalTransactionDate = new Date(data.date);
+        // The date string from the form is 'YYYY-MM-DD'.
+        // Create a date object from it, ensuring it's treated as local time
+        // by splitting and re-assembling to avoid UTC conversion issues.
+        const dateParts = data.date.split('-').map(p => parseInt(p, 10));
+        const originalTransactionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
         const groupId = doc(collection(firestore, 'some_path')).id; // Temporary ref to get a new ID
 
         for (let i = 0; i < installmentCount; i++) {
@@ -434,6 +441,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                             } else {
                                                                 field.onChange([...selectedTags, currentValue]);
                                                             }
+                                                            setOpenTags(true);
                                                         }}
                                                     >
                                                         {tag.name}

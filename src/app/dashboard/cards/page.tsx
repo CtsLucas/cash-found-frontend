@@ -123,7 +123,7 @@ function InvoicesList({ cardId, transactions }: { cardId: string, transactions: 
                 <TableBody>
                     {selectedTransactions.map(t => (
                         <TableRow key={t.id}>
-                            <TableCell>{new Date(t.date).toLocaleDateString()}</TableCell>
+                            <TableCell>{new Date(`${t.date}T00:00:00Z`).toLocaleDateString(undefined, { timeZone: 'UTC' })}</TableCell>
                             <TableCell>{t.description}</TableCell>
                             <TableCell>
                                 {t.installments && t.currentInstallment ? `${t.currentInstallment}/${t.installments}` : '-'}
@@ -210,6 +210,7 @@ export default function CardsPage() {
                         const spending = getCardSpending(card.id);
                         const availableLimit = card.limit - spending;
                         const isSelected = selectedCardId === card.id;
+                        const dueDate = new Date(`${card.dueDate}T00:00:00Z`);
 
                         return (
                             <div key={card.id}>
@@ -240,7 +241,7 @@ export default function CardsPage() {
                                     </AddCardSheet>
 
                                     <footer className="flex justify-between items-end text-xs">
-                                        <span>Due: {new Date(card.dueDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}</span>
+                                        <span>Due: {dueDate.toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', timeZone: 'UTC' })}</span>
                                         <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
                                     </footer>
                                 </div>

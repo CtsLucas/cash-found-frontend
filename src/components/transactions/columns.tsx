@@ -153,11 +153,10 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
 
         useEffect(() => {
           // The date string from the data is 'YYYY-MM-DD'.
-          // We need to parse it correctly to avoid timezone issues.
-          // By splitting the string and creating a date, we treat it as local time.
-          const parts = dateString.split('-').map(part => parseInt(part, 10));
-          const date = new Date(parts[0], parts[1] - 1, parts[2]);
-          setClientDate(date.toLocaleDateString());
+          // To avoid timezone issues where this might be interpreted as the previous day,
+          // we explicitly tell JavaScript to treat it as UTC.
+          const date = new Date(`${dateString}T00:00:00Z`);
+          setClientDate(date.toLocaleDateString(undefined, { timeZone: 'UTC' }));
         }, [dateString]);
         
         return (
