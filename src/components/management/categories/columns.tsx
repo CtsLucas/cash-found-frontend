@@ -46,6 +46,7 @@ export const categoryColumns = (onEdit: (category: Category) => void): ColumnDef
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]

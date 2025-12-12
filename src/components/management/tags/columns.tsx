@@ -46,6 +46,7 @@ export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]
