@@ -99,6 +99,43 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
     }
   },
   {
+    accessorKey: "cardId",
+    header: "Card",
+    cell: ({ row, table }) => {
+        const cardId = row.getValue("cardId") as string;
+        const { cards } = (table.options.meta as { cards: Card[] })
+        
+        if (!cardId) {
+            return null;
+        }
+
+        const card = cards?.find(c => c.id === cardId);
+
+        return card ? (
+            <Badge style={{ backgroundColor: card.color }} className="text-white">
+                {card.cardName}
+            </Badge>
+        ) : null;
+    }
+  },
+  {
+    accessorKey: "installments",
+    header: () => <div className="text-center">Installments</div>,
+    cell: ({ row }) => {
+      const installments = row.getValue("installments") as number | undefined;
+
+      if (!installments || installments <= 1) {
+        return <div className="text-center text-muted-foreground">-</div>;
+      }
+      
+      return (
+        <div className="text-center">
+            {installments}
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: "amount",
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
@@ -126,26 +163,6 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
         </div>
       )
     },
-  },
-  {
-    accessorKey: "cardId",
-    header: "Card",
-    cell: ({ row, table }) => {
-        const cardId = row.getValue("cardId") as string;
-        const { cards } = (table.options.meta as { cards: Card[] })
-        
-        if (!cardId) {
-            return null;
-        }
-
-        const card = cards?.find(c => c.id === cardId);
-
-        return card ? (
-            <Badge style={{ backgroundColor: card.color }} className="text-white">
-                {card.cardName}
-            </Badge>
-        ) : null;
-    }
   },
   {
     accessorKey: "date",
