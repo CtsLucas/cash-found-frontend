@@ -11,10 +11,10 @@ export interface CurrencyInputProps extends Omit<InputProps, 'onChange' | 'value
 }
 
 const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
-  ({ value, onValueChange, ...props }, ref) => {
+  ({ value, onValueChange, onBlur, onFocus, ...props }, ref) => {
     const [displayValue, setDisplayValue] = React.useState('');
 
-    const format = (num: number) => {
+    const formatToCurrency = (num: number) => {
       return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -23,32 +23,45 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
       }).format(num);
     };
 
-    // Effect to format the value when it changes from the form state
     React.useEffect(() => {
-        if (value != null) {
-            setDisplayValue(format(value));
+        if (value != null && value !== 0) {
+            // Only format if not focused on it.
+            if (document.activeElement !== ref) {
+                setDisplayValue(formatToCurrency(value));
+            }
         } else {
             setDisplayValue('');
         }
-    }, [value]);
+    }, [value, ref]);
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = e.target.value;
-        setDisplayValue(rawValue);
+        const sanitized = rawValue.replace(/[^0-9.]/g, '');
+        setDisplayValue(sanitized);
     };
 
-    const handleBlur = () => {
-        const numericValue = parseFloat(displayValue.replace(/[^0-9.-]+/g, ''));
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const numericValue = parseFloat(e.target.value);
         if (!isNaN(numericValue)) {
-            setDisplayValue(format(numericValue));
+            setDisplayValue(formatToCurrency(numericValue));
             onValueChange?.(numericValue);
         } else {
-            // Handle case where input is cleared or invalid
             setDisplayValue('');
             onValueChange?.(undefined);
         }
+        onBlur?.(e);
     };
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        const numericValue = parseFloat(e.target.value.replace(/[^0-9.,$]/g, ''));
+        if (!isNaN(numericValue) && numericValue !== 0) {
+            setDisplayValue(String(numericValue));
+        } else {
+            setDisplayValue('');
+        }
+        onFocus?.(e);
+    }
 
     return (
       <Input
@@ -56,6 +69,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         value={displayValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        onFocus={handleFocus}
         ref={ref}
         {...props}
       />
