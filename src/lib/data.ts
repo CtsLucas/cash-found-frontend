@@ -1,14 +1,14 @@
 import { Transaction } from '@/lib/types';
 
 export const transactions: Transaction[] = [
-  { id: 'TXN001', date: '2024-07-15', description: "Trader Joe's", amount: 85.4, type: 'expense', category: 'Groceries' },
+  { id: 'TXN001', date: '2024-07-15', description: "Trader Joe's", amount: 85.4, deduction: 10, type: 'expense', category: 'Groceries' },
   { id: 'TXN002', date: '2024-07-15', description: 'Netflix Subscription', amount: 15.99, type: 'expense', category: 'Entertainment' },
   { id: 'TXN003', date: '2024-07-14', description: 'Monthly Salary', amount: 4500, type: 'income', category: 'Salary' },
   { id: 'TXN004', date: '2024-07-13', description: 'Gas Bill', amount: 65.0, type: 'expense', category: 'Utilities' },
   { id: 'TXN005', date: '2024-07-12', description: 'Freelance Project', amount: 750, type: 'income', category: 'Freelance' },
   { id: 'TXN006', date: '2024-07-11', description: 'Subway Fare', amount: 2.75, type: 'expense', category: 'Transport' },
   { id: 'TXN007', date: '2024-07-10', description: 'Apartment Rent', amount: 1200, type: 'expense', category: 'Rent' },
-  { id: 'TXN008', date: '2024-07-09', description: 'Movie Tickets', amount: 30, type: 'expense', category: 'Entertainment' },
+  { id: 'TXN008', date: '2024-07-09', description: 'Movie Tickets', amount: 30, deduction: 5, type: 'expense', category: 'Entertainment' },
   { id: 'TXN009', date: '2024-07-08', description: 'Walmart', amount: 124.5, type: 'expense', category: 'Groceries' },
   { id: 'TXN010', date: '2024-07-01', description: 'Phone Bill', amount: 80, type: 'expense', category: 'Utilities' },
 ];
@@ -28,5 +28,5 @@ export const cards = [
 ];
 
 export const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-export const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+export const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (t.amount - (t.deduction || 0)), 0);
 export const balance = totalIncome - totalExpenses;

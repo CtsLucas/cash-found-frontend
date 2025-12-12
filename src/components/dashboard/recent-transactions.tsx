@@ -42,7 +42,12 @@ export function RecentTransactions() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentTransactions.map((transaction) => (
+            {recentTransactions.map((transaction) => {
+              const amount = transaction.type === 'expense' 
+                ? transaction.amount - (transaction.deduction || 0)
+                : transaction.amount;
+
+              return (
               <TableRow key={transaction.id}>
                 <TableCell>
                   <div className="font-medium">{transaction.description}</div>
@@ -52,10 +57,10 @@ export function RecentTransactions() {
                 </TableCell>
                 <TableCell className="hidden sm:table-cell capitalize">{transaction.type}</TableCell>
                 <TableCell className={`text-right ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-                  {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                  {transaction.type === 'income' ? '+' : '-'}{formatCurrency(amount)}
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </CardContent>

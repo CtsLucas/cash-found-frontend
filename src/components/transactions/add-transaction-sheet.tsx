@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Sheet,
   SheetContent,
@@ -21,9 +23,12 @@ import {
   } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import React from "react";
   
 
 export function AddTransactionSheet() {
+  const [type, setType] = React.useState("expense");
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -46,7 +51,7 @@ export function AddTransactionSheet() {
             <Label htmlFor="type" className="text-right">
               Type
             </Label>
-            <RadioGroup defaultValue="expense" className="col-span-3 flex items-center gap-4">
+            <RadioGroup value={type} onValueChange={setType} className="col-span-3 flex items-center gap-4">
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="expense" id="r1" />
                     <Label htmlFor="r1">Expense</Label>
@@ -63,6 +68,14 @@ export function AddTransactionSheet() {
             </Label>
             <Input id="amount" type="number" placeholder="$0.00" className="col-span-3" />
           </div>
+          {type === 'expense' && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="deduction" className="text-right">
+                Deduction
+              </Label>
+              <Input id="deduction" type="number" placeholder="$0.00" className="col-span-3" />
+            </div>
+          )}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
               Description

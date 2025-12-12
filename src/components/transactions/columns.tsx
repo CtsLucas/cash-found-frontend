@@ -70,10 +70,28 @@ export const columns: ColumnDef<Transaction>[] = [
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"))
-      const type = row.original.type
-      const formatted = formatCurrency(amount);
+      const { type, deduction } = row.original
+      
+      if (type === 'income') {
+        return <div className={`text-right font-medium text-green-500`}>+{formatCurrency(amount)}</div>
+      }
 
-      return <div className={`text-right font-medium ${type === 'income' ? 'text-green-500' : 'text-red-500'}`}>{type === 'income' ? '+' : '-'}{formatted}</div>
+      const finalAmount = amount - (deduction || 0)
+      
+      return (
+        <div className="text-right font-medium text-red-500">
+            {deduction ? (
+                <div className="flex flex-col items-end">
+                    <span>-{formatCurrency(finalAmount)}</span>
+                    <span className="text-xs text-muted-foreground line-through">
+                        ({formatCurrency(amount)} - {formatCurrency(deduction)})
+                    </span>
+                </div>
+            ) : (
+                <span>-{formatCurrency(amount)}</span>
+            )}
+        </div>
+      )
     },
   },
   {
