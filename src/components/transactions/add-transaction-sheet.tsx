@@ -58,9 +58,9 @@ type TransactionFormValues = z.infer<typeof transactionSchema>;
 const getInvoiceMonths = () => {
     const months = [];
     const today = new Date();
-    for (let i = 0; i < 12; i++) {
-        const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        months.push(date.toLocaleString('default', { month: 'long', year: 'numeric' }));
+    for (let i = 0; i < 13; i++) { // Current month + next 12 months
+        const date = add(today, { months: i });
+        months.push(format(date, 'MMMM yyyy'));
     }
     return months;
 }
@@ -101,7 +101,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
   const { data: cards } = useCollection<Card>(cardsQuery);
 
   const invoiceMonths = React.useMemo(() => getInvoiceMonths(), []);
-  const currentMonth = invoiceMonths[0];
+  const currentMonth = format(new Date(), 'MMMM yyyy');
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
