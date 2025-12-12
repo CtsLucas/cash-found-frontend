@@ -1,3 +1,4 @@
+
 /**
  * Core Philosophy: This ruleset enforces a strict user-ownership model. All data is considered private and can only be
  * accessed by the user who created it. There are no public or shared collections.
@@ -144,10 +145,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's transactions.
        */
       match /transactions/{transactionId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-        allow update: if isExistingOwner(userId) && userIdIsImmutable();
-        allow delete: if isExistingOwner(userId);
+        allow read, write: if isOwner(userId);
       }
 
       /**
@@ -157,10 +155,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's categories.
        */
       match /categories/{categoryId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-        allow update: if isExistingOwner(userId) && userIdIsImmutable();
-        allow delete: if isExistingOwner(userId);
+        allow read, write: if isOwner(userId);
       }
 
       /**
@@ -170,10 +165,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's tags.
        */
       match /tags/{tagId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-        allow update: if isExistingOwner(userId) && userIdIsImmutable();
-        allow delete: if isExistingOwner(userId);
+        allow read, write: if isOwner(userId);
       }
 
       /**
@@ -183,10 +175,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's cards.
        */
       match /cards/{cardId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-        allow update: if isExistingOwner(userId) && userIdIsImmutable();
-        allow delete: if isExistingOwner(userId);
+        allow read, write: if isOwner(userId);
 
         /**
          * @description Manages invoices for a specific card.
@@ -195,10 +184,7 @@ service cloud.firestore {
          * @deny A user cannot query invoices for another user's card.
          */
         match /invoices/{invoiceId} {
-          allow read: if isOwner(userId);
-          allow create: if isOwner(userId) && hasValidCardIdOnCreate(cardId);
-          allow update: if isExistingOwner(userId) && cardIdIsImmutable();
-          allow delete: if isExistingOwner(userId);
+          allow read, write: if isOwner(userId);
         }
       }
 
@@ -209,11 +195,10 @@ service cloud.firestore {
        * @deny A user cannot query another user's installments.
        */
       match /transactions/{transactionId}/installments/{installmentId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidTransactionIdOnCreate(transactionId);
-        allow update: if isExistingOwner(userId) && transactionIdIsImmutable();
-        allow delete: if isExistingOwner(userId);
+        allow read, write: if isOwner(userId);
       }
     }
   }
 }
+
+    
