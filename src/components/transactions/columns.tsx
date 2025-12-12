@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Transaction } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { Category, Tag } from "@/lib/types"
@@ -60,28 +60,13 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => {
-        const firestore = useFirestore();
-        const { user } = useUser();
+    cell: ({ row, table }) => {
         const categoryId = row.getValue("category") as string;
-        const [categoryName, setCategoryName] = useState("...")
-
-        const categoriesQuery = useMemoFirebase(() => {
-            if (!user) return null;
-            return collection(firestore, `users/${user.uid}/categories`);
-          }, [firestore, user]);
-        const { data: categories } = useCollection<Category>(categoriesQuery);
-        
-        useEffect(() => {
-            if (categories) {
-                const category = categories.find(c => c.id === categoryId);
-                setCategoryName(category?.name || "Uncategorized");
-            }
-        }, [categories, categoryId])
-
+        const { categories } = (table.options.meta as { categories: Category[] })
+        const category = categories?.find(c => c.id === categoryId);
 
       return (
-        <Badge variant="outline">{categoryName}</Badge>
+        <Badge variant="outline">{category?.name || "..."}</Badge>
       )
     },
     filterFn: (row, id, value) => {
@@ -91,32 +76,19 @@ export const columns = (onEdit: (transaction: Transaction) => void): ColumnDef<T
   {
     accessorKey: "tags",
     header: "Tags",
-    cell: ({ row }) => {
-        const firestore = useFirestore();
-        const { user } = useUser();
+    cell: ({ row, table }) => {
         const tagIds = row.getValue("tags") as string[] | undefined;
-        const [tagNames, setTagNames] = useState<string[]>([]);
-
-        const tagsQuery = useMemoFirebase(() => {
-            if (!user) return null;
-            return collection(firestore, `users/${user.uid}/tags`);
-        }, [firestore, user]);
-        const { data: allTags } = useCollection<Tag>(tagsQuery);
+        const { tags } = (table.options.meta as { tags: Tag[] })
         
-        useEffect(() => {
-            if (allTags && tagIds) {
-                const names = tagIds.map(tagId => {
-                    const tag = allTags.find(t => t.id === tagId);
-                    return tag ? tag.name : '';
-                }).filter(name => name);
-                setTagNames(names);
-            }
-        }, [allTags, tagIds])
-
-
         if (!tagIds || tagIds.length === 0) {
             return null;
         }
+
+        const tagNames = tagIds.map(tagId => {
+            const tag = tags?.find(t => t.id === tagId);
+            return tag ? tag.name : '';
+        }).filter(name => name);
+
         return (
             <div className="flex space-x-1">
                 {tagNames.map(name => (

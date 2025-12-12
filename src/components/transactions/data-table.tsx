@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -26,6 +27,9 @@ import {
 } from "@/components/ui/table"
 
 import { DataTablePagination } from "./data-table-pagination"
+import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
+import { collection } from "firebase/firestore"
+import { Category, Tag } from "@/lib/types"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -44,6 +48,21 @@ export function DataTable<TData, TValue>({
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
 
+  const firestore = useFirestore();
+  const { user } = useUser();
+
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, `users/${user.uid}/categories`);
+  }, [firestore, user]);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
+
+  const tagsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, `users/${user.uid}/tags`);
+  }, [firestore, user]);
+  const { data: tags } = useCollection<Tag>(tagsQuery);
+
   const table = useReactTable({
     data,
     columns,
@@ -52,6 +71,10 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+    },
+    meta: {
+      categories,
+      tags
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
