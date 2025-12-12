@@ -26,10 +26,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
   
 const cardSchema = z.object({
     cardName: z.string().min(1, "Card name is required"),
-    last4: z.string().length(4, "Must be 4 digits"),
     limit: z.coerce.number().positive("Limit must be positive"),
     dueDate: z.string().min(1, "Due date is required"),
-    closingDate: z.string().min(1, "Closing date is required"),
+    color: z.string().optional(),
     userId: z.string()
 });
 
@@ -44,10 +43,9 @@ export function AddCardSheet() {
     resolver: zodResolver(cardSchema),
     defaultValues: {
       cardName: "",
-      last4: "",
       limit: 0,
       dueDate: "",
-      closingDate: "",
+      color: "#6b7280",
       userId: user?.uid
     },
   });
@@ -56,10 +54,9 @@ export function AddCardSheet() {
     if (user) {
         form.reset({
             cardName: "",
-            last4: "",
             limit: 0,
             dueDate: "",
-            closingDate: "",
+            color: "#6b7280",
             userId: user.uid
         });
     }
@@ -107,19 +104,6 @@ export function AddCardSheet() {
                 />
                 <FormField
                     control={form.control}
-                    name="last4"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Last 4 Digits</FormLabel>
-                            <FormControl>
-                                <Input type="text" placeholder="1234" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
                     name="limit"
                     render={({ field }) => (
                         <FormItem>
@@ -131,7 +115,7 @@ export function AddCardSheet() {
                         </FormItem>
                     )}
                 />
-                <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="dueDate"
@@ -146,17 +130,17 @@ export function AddCardSheet() {
                         )}
                     />
                     <FormField
-                        control={form.control}
-                        name="closingDate"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Closing Date</FormLabel>
-                                <FormControl>
-                                    <Input type="date" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                      control={form.control}
+                      name="color"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Card Color</FormLabel>
+                          <FormControl>
+                            <Input type="color" {...field} className="h-10 p-1"/>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                 </div>
                 

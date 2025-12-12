@@ -29,10 +29,9 @@ export type Tag = {
 export type Card = {
   id: string;
   cardName: string;
-  last4: string;
   limit: number;
   dueDate: string;
-  closingDate: string;
+  color?: string;
   userId?: string;
 };
 

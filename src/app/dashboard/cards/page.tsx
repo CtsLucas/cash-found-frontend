@@ -84,9 +84,9 @@ export default function CardsPage() {
                 const usagePercentage = card.limit > 0 ? (spending / card.limit) * 100 : 0;
 
                 return (
-                    <Card key={card.id}>
+                    <Card key={card.id} style={{ borderTopColor: card.color, borderTopWidth: '4px' }}>
                         <CardHeader className="pb-2">
-                            <CardDescription>{card.cardName} - {card.last4}</CardDescription>
+                            <CardDescription>{card.cardName}</CardDescription>
                             <CardTitle className="text-4xl">{formatCurrency(availableLimit)}</CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -97,7 +97,6 @@ export default function CardsPage() {
                         </CardContent>
                         <CardFooter className="flex justify-between text-sm text-muted-foreground">
                             <span>Due: {new Date(card.dueDate).toLocaleDateString()}</span>
-                            <span>Closes: {new Date(card.closingDate).toLocaleDateString()}</span>
                         </CardFooter>
                     </Card>
                 )
