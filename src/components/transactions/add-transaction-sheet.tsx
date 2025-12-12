@@ -264,8 +264,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                         <RadioGroupItem value="expense" id="r1" className="sr-only" />
                                         <FormLabel htmlFor="r1">
                                             <div className={cn(
-                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
-                                                field.value === 'expense' && "border-destructive"
+                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                                field.value === 'expense' && "bg-red-500 text-white border-red-500"
                                             )}>
                                                 Expense
                                             </div>
@@ -275,8 +275,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                         <RadioGroupItem value="income" id="r2" className="sr-only" />
                                         <FormLabel htmlFor="r2">
                                             <div className={cn(
-                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
-                                                field.value === 'income' && "border-primary"
+                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                                field.value === 'income' && "bg-green-500 text-white border-green-500"
                                             )}>
                                                 Income
                                             </div>
@@ -518,3 +518,5 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
+    
