@@ -1,8 +1,14 @@
+
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { cards, transactions } from "@/lib/data";
+import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase";
+import { Card as CardType, Transaction } from "@/lib/types";
+import { collection, query, where } from "firebase/firestore";
 import { PlusCircle } from "lucide-react";
+import { useMemo } from "react";
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -11,13 +17,54 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
   };
 
+function CardSpending({ cardId }: { cardId: string }) {
+    const firestore = useFirestore();
+    const { user } = useUser();
+    const transactionsQuery = useMemoFirebase(() => {
+        if (!user) return null;
+        return query(
+            collection(firestore, `users/${user.uid}/transactions`),
+            where('cardId', '==', cardId),
+            where('type', '==', 'expense')
+        );
+    }, [firestore, user, cardId]);
+    const { data: transactions } = useCollection<Transaction>(transactionsQuery);
+
+    const totalSpending = useMemo(() => {
+        return transactions?.reduce((acc, t) => acc + t.amount - (t.deduction || 0), 0) ?? 0;
+    }, [transactions]);
+
+    return {
+        totalSpending,
+        transactions
+    };
+}
+
+
 export default function CardsPage() {
+    const firestore = useFirestore();
+    const { user } = useUser();
+
+    const cardsQuery = useMemoFirebase(() => {
+        if (!user) return null;
+        return collection(firestore, `users/${user.uid}/cards`);
+    }, [firestore, user]);
+
+    const { data: cards, isLoading: isLoadingCards } = useCollection<CardType>(cardsQuery);
+    
+    // We need all transactions to calculate spending per card
+    const allTransactionsQuery = useMemoFirebase(() => {
+        if (!user) return null;
+        return query(collection(firestore, `users/${user.uid}/transactions`), where('type', '==', 'expense'));
+    }, [firestore, user]);
+
+    const { data: allTransactions, isLoading: isLoadingTransactions } = useCollection<Transaction>(allTransactionsQuery);
 
     const getCardSpending = (cardId: string) => {
-        // This is a mock calculation. In a real app, you'd filter transactions by cardId and date range.
-        return transactions
-            .filter(t => t.type === 'expense')
-            .reduce((acc, t) => acc + t.amount, 0) / cards.length;
+        if (!allTransactions) return 0;
+        return allTransactions
+            .filter(t => t.cardId === cardId)
+            .reduce((acc, t) => acc + t.amount - (t.deduction || 0), 0);
     }
 
   return (
@@ -33,9 +80,9 @@ export default function CardsPage() {
                 </Button>
             </div>
         </div>
-
+        {isLoadingCards && <p>Loading cards...</p>}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {cards.map(card => {
+            {cards?.map(card => {
                 const spending = getCardSpending(card.id);
                 const availableLimit = card.limit - spending;
                 const usagePercentage = (spending / card.limit) * 100;
@@ -43,7 +90,7 @@ export default function CardsPage() {
                 return (
                     <Card key={card.id}>
                         <CardHeader className="pb-2">
-                            <CardDescription>{card.cardName}</CardDescription>
+                            <CardDescription>{card.cardName} - {card.last4}</CardDescription>
                             <CardTitle className="text-4xl">{formatCurrency(availableLimit)}</CardTitle>
                         </CardHeader>
                         <CardContent>
