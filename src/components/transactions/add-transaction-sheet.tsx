@@ -57,7 +57,7 @@ const getInvoiceMonths = () => {
     const months = [];
     const today = new Date();
     for (let i = 0; i < 12; i++) {
-        const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
         months.push(date.toLocaleString('default', { month: 'long', year: 'numeric' }));
     }
     return months;
@@ -124,7 +124,12 @@ export function AddTransactionSheet() {
   const onSubmit = (data: TransactionFormValues) => {
     if (!user) return;
     const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
-    addDocumentNonBlocking(transactionsCollection, data);
+    const dataToSave = { ...data };
+    if(data.type === 'income') {
+      delete dataToSave.cardId;
+      delete dataToSave.invoiceMonth;
+    }
+    addDocumentNonBlocking(transactionsCollection, dataToSave);
     setIsOpen(false);
     form.reset();
   };
@@ -390,3 +395,5 @@ export function AddTransactionSheet() {
     </Sheet>
   );
 }
+
+    
