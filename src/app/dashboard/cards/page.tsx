@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { AddCardSheet } from "@/components/cards/add-card-sheet";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { add, format, setDate } from "date-fns";
+import { add, format, setDate, isValid } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
 import { PlusCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -210,7 +210,7 @@ export default function CardsPage() {
                         const spending = getCardSpending(card.id);
                         const availableLimit = card.limit - spending;
                         const isSelected = selectedCardId === card.id;
-                        const dueDate = setDate(new Date(), card.dueDate);
+                        const dueDate = typeof card.dueDate === 'number' ? setDate(new Date(), card.dueDate) : null;
 
                         return (
                             <div key={card.id}>
@@ -241,7 +241,7 @@ export default function CardsPage() {
                                     </AddCardSheet>
 
                                     <footer className="flex justify-between items-end text-xs">
-                                        <span>Due: {format(dueDate, 'dd/MM')}</span>
+                                        <span>Due: {dueDate && isValid(dueDate) ? format(dueDate, 'dd/MM') : 'N/A'}</span>
                                         <span className="font-mono tracking-widest opacity-80">•••• {card.last4}</span>
                                     </footer>
                                 </div>
