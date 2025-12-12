@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -122,12 +123,6 @@ const CommandItem = React.forwardRef<
       className
     )}
     {...props}
-    onSelect={(...args) => {
-      if (props.onSelect) {
-        // @ts-ignore
-        props.onSelect(...args);
-      }
-    }}
   />
 ))
 

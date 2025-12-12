@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import {
@@ -343,14 +344,14 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                                 {tags?.map((tag) => (
                                                     <CommandItem
                                                         key={tag.id}
-                                                        onSelect={(currentValue) => {
-                                                            const currentValueArray = field.value || [];
-                                                            const value = tag.id;
-                                                            if (currentValueArray.includes(value)) {
-                                                                field.onChange(currentValueArray.filter(id => id !== value));
-                                                            } else {
-                                                                field.onChange([...currentValueArray, value]);
-                                                            }
+                                                        onSelect={() => {
+                                                          const currentValue = field.value || [];
+                                                          const isSelected = currentValue.includes(tag.id);
+                                                          if (isSelected) {
+                                                            field.onChange(currentValue.filter(id => id !== tag.id));
+                                                          } else {
+                                                            field.onChange([...currentValue, tag.id]);
+                                                          }
                                                         }}
                                                     >
                                                         {tag.name}
@@ -438,3 +439,4 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
+
