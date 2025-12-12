@@ -262,24 +262,30 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                                     className="grid grid-cols-2 gap-2"
                                 >
                                     <FormItem>
-                                        <RadioGroupItem value="expense" id="r1" className="sr-only" />
+                                        <FormControl>
+                                            <RadioGroupItem value="expense" id="r1" className="sr-only" />
+                                        </FormControl>
                                         <div
                                             onClick={() => field.onChange('expense')}
                                             className={cn(
-                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                                                field.value === 'expense' && "bg-red-500 text-white border-red-500"
+                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 cursor-pointer",
+                                                "hover:bg-red-500/10 hover:border-red-500/20",
+                                                field.value === 'expense' && "bg-red-500 text-white border-red-500 hover:bg-red-500/90"
                                             )}
                                         >
                                             Expense
                                         </div>
                                     </FormItem>
                                     <FormItem>
-                                        <RadioGroupItem value="income" id="r2" className="sr-only" />
+                                        <FormControl>
+                                            <RadioGroupItem value="income" id="r2" className="sr-only" />
+                                        </FormControl>
                                         <div
                                             onClick={() => field.onChange('income')}
                                             className={cn(
-                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                                                field.value === 'income' && "bg-green-500 text-white border-green-500"
+                                                "flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 cursor-pointer",
+                                                "hover:bg-green-500/10 hover:border-green-500/20",
+                                                field.value === 'income' && "bg-green-500 text-white border-green-500 hover:bg-green-500/90"
                                             )}
                                         >
                                             Income
@@ -521,4 +527,3 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     </Sheet>
   );
 }
-
