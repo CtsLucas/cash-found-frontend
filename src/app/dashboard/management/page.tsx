@@ -15,10 +15,15 @@ import { ClientOnly } from "@/components/client-only"
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
 import { Category, Tag } from "@/lib/types"
 import { collection } from "firebase/firestore"
+import { useState } from "react"
   
 export default function ManagementPage() {
     const firestore = useFirestore();
     const { user } = useUser();
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [editingTag, setEditingTag] = useState<Tag | null>(null);
+    const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+    const [isTagSheetOpen, setIsTagSheetOpen] = useState(false);
 
     const categoriesQuery = useMemoFirebase(() => {
         if (!user) return null;
@@ -31,6 +36,30 @@ export default function ManagementPage() {
         return collection(firestore, `users/${user.uid}/tags`);
     }, [firestore, user]);
     const { data: tags, isLoading: isLoadingTags } = useCollection<Tag>(tagsQuery);
+    
+    const handleEditCategory = (category: Category) => {
+        setEditingCategory(category);
+        setIsCategorySheetOpen(true);
+    }
+    
+    const handleEditTag = (tag: Tag) => {
+        setEditingTag(tag);
+        setIsTagSheetOpen(true);
+    }
+
+    const handleCategorySheetOpenChange = (isOpen: boolean) => {
+        setIsCategorySheetOpen(isOpen);
+        if (!isOpen) {
+            setEditingCategory(null);
+        }
+    }
+
+    const handleTagSheetOpenChange = (isOpen: boolean) => {
+        setIsTagSheetOpen(isOpen);
+        if (!isOpen) {
+            setEditingTag(null);
+        }
+    }
 
 
 return (
@@ -44,18 +73,31 @@ return (
                 <TabsTrigger value="categories">Categories</TabsTrigger>
                 <TabsTrigger value="tags">Tags</TabsTrigger>
             </TabsList>
-            <div className="ml-auto flex items-center gap-2">
-                <AddItemSheet />
-            </div>
             </div>
             <TabsContent value="categories">
               <ClientOnly>
-                {isLoadingCategories ? <p>Loading...</p> : <DataTable columns={categoryColumns} data={categories || []} />}
+                <div className="flex justify-end py-2">
+                    <AddItemSheet 
+                        itemType="Category"
+                        isOpen={isCategorySheetOpen}
+                        onOpenChange={handleCategorySheetOpenChange}
+                        editingItem={editingCategory}
+                    />
+                </div>
+                {isLoadingCategories ? <p>Loading...</p> : <DataTable columns={categoryColumns(handleEditCategory)} data={categories || []} />}
               </ClientOnly>
             </TabsContent>
             <TabsContent value="tags">
               <ClientOnly>
-                {isLoadingTags ? <p>Loading...</p> : <DataTable columns={tagColumns} data={tags || []} />}
+                <div className="flex justify-end py-2">
+                    <AddItemSheet 
+                        itemType="Tag"
+                        isOpen={isTagSheetOpen}
+                        onOpenChange={handleTagSheetOpenChange}
+                        editingItem={editingTag}
+                    />
+                </div>
+                {isLoadingTags ? <p>Loading...</p> : <DataTable columns={tagColumns(handleEditTag)} data={tags || []} />}
               </ClientOnly>
             </TabsContent>
         </Tabs>

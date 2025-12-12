@@ -1,12 +1,12 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Category } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export const categoryColumns: ColumnDef<Category>[] = [
+export const categoryColumns = (onEdit: (category: Category) => void): ColumnDef<Category>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -45,20 +45,7 @@ export const categoryColumns: ColumnDef<Category>[] = [
     },
   },
   {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => {
-      const type = row.getValue("type") as string;
-      return (
-        <Badge variant={type === 'income' ? 'default' : 'secondary'} className="capitalize">{type}</Badge>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
-  },
-  {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]

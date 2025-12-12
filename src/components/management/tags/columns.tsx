@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -5,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Tag } from "@/lib/types"
 import { DataTableRowActions } from "./data-table-row-actions"
 
-export const tagColumns: ColumnDef<Tag>[] = [
+export const tagColumns = (onEdit: (tag: Tag) => void): ColumnDef<Tag>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -45,6 +46,6 @@ export const tagColumns: ColumnDef<Tag>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
 ]
