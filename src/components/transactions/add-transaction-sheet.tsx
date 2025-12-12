@@ -38,6 +38,7 @@ import { add, format } from "date-fns";
 import { CurrencyInput } from "../ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "../i18n/language-provider";
+import { MultiSelect } from "../ui/multi-select";
 
 const transactionSchema = z.object({
     type: z.enum(["expense", "income"]),
@@ -46,7 +47,7 @@ const transactionSchema = z.object({
     description: z.string().min(1, "Description is required."),
     category: z.string().min(1, "Category is required."),
     date: z.string().min(1, "Date is required."),
-    tagId: z.string().optional(),
+    tagIds: z.array(z.string()).optional(),
     cardId: z.string().optional(),
     invoiceMonth: z.string().optional(),
     installments: z.coerce.number().min(1).optional(),
@@ -118,7 +119,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             description: "",
             category: "",
             date: new Date().toISOString().split("T")[0],
-            tagId: "",
+            tagIds: [],
             cardId: "",
             invoiceMonth: currentMonthValue,
             installments: 1,
@@ -143,7 +144,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 description: "",
                 category: "",
                 date: new Date().toISOString().split("T")[0],
-                tagId: "",
+                tagIds: [],
                 cardId: "",
                 invoiceMonth: currentMonthValue,
                 installments: 1,
@@ -154,7 +155,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
                 form.reset({
                     ...editingTransaction,
                     date: editingTransaction.date || '',
-                    tagId: editingTransaction.tagId || "",
+                    tagIds: editingTransaction.tagIds || [],
                     cardId: editingTransaction.cardId || "",
                     invoiceMonth: editingTransaction.invoiceMonth || currentMonthValue,
                     installments: editingTransaction.installments || 1,
@@ -180,10 +181,6 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             dataToSave.cardId = '';
         }
         
-        if (data.tagId === 'none') {
-            dataToSave.tagId = '';
-        }
-
         const installmentCount = data.installments || 1;
 
         if (isEditing) {
@@ -234,6 +231,8 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
     };
 
     const isEditing = !!editingTransaction;
+    const tagOptions = allTags?.map(tag => ({ value: tag.id, label: tag.name })) || [];
+
 
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -398,26 +397,20 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
 
                         <FormField
                             control={form.control}
-                            name="tagId"
+                            name="tagIds"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>{t('tag')}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder={t('transactions.form.tags.placeholder')} />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                             <SelectItem value="none">{t('none')}</SelectItem>
-                                            {allTags?.map(tag => <SelectItem key={tag.id} value={tag.id}>{tag.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormLabel>{t('tags')}</FormLabel>
+                                    <MultiSelect
+                                        options={tagOptions}
+                                        selected={field.value || []}
+                                        onChange={field.onChange}
+                                        placeholder={t('transactions.form.tags.placeholder')}
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-
 
                         <FormField
                             control={form.control}

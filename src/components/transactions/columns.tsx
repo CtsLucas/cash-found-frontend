@@ -87,21 +87,23 @@ export const columns = (onEdit: (transaction: Transaction) => void, t: TFunction
     },
   },
   {
-    accessorKey: "tagId",
-    header: () => <div className="text-center">{t('tag')}</div>,
+    accessorKey: "tagIds",
+    header: () => <div className="text-center">{t('tags')}</div>,
     cell: ({ row, table }) => {
-        const tagId = row.getValue("tagId") as string | undefined;
+        const tagIds = row.getValue("tagIds") as string[] | undefined;
         const { tags } = (table.options.meta as { tags: Tag[] })
         
-        if (!tagId) {
+        if (!tagIds || tagIds.length === 0) {
             return <div className="text-center text-muted-foreground">-</div>;
         }
 
-        const tag = tags?.find(t => t.id === tagId);
+        const selectedTags = tags?.filter(t => tagIds.includes(t.id));
         
-        return tag ? (
-            <div className="text-center">
-                <Badge variant="secondary">{tag.name}</Badge>
+        return selectedTags ? (
+            <div className="flex items-center justify-center gap-1 flex-wrap">
+                {selectedTags.map(tag => (
+                    <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+                ))}
             </div>
         ) : <div className="text-center text-muted-foreground">-</div>;
     }
