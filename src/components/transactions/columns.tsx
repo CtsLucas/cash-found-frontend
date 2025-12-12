@@ -79,7 +79,12 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => {
-        const date = new Date(row.getValue("date"))
+        const dateString = row.getValue("date") as string;
+        // The date string from the data is 'YYYY-MM-DD'.
+        // We need to parse it correctly to avoid timezone issues.
+        // By splitting the string and creating a date, we treat it as local time.
+        const parts = dateString.split('-').map(part => parseInt(part, 10));
+        const date = new Date(parts[0], parts[1] - 1, parts[2]);
         const formattedDate = date.toLocaleDateString()
         return (
             <div>{formattedDate}</div>
