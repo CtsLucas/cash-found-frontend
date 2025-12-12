@@ -61,7 +61,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     // To avoid timezone issues where this might be interpreted as the previous day,
     // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
     const date = new Date(`${dateString}T00:00:00Z`);
-    return new Intl.DateTimeFormat(locale, { timeZone: 'UTC' }).format(date);
+    return new Intl.DateTimeFormat(locale, { 
+      timeZone: 'UTC',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric' 
+    }).format(date);
   }, [locale]);
 
   const getMonthName = useCallback((monthIndex: number) => {
