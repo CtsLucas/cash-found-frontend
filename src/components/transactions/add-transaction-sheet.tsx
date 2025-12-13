@@ -170,7 +170,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         if (!user || !firestore) return;
 
         const dataToSave: Partial<Transaction> = { ...data };
-        if (data.type === 'income') {
+        if (data.type === 'income' || data.cardId === 'none') {
             delete dataToSave.cardId;
             delete dataToSave.invoiceMonth;
             delete dataToSave.deduction;
@@ -182,6 +182,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
         }
         
         const installmentCount = data.installments || 1;
+        const isEditing = !!editingTransaction;
 
         if (isEditing) {
             if (editingTransaction?.id) {
@@ -198,7 +199,7 @@ export function AddTransactionSheet({ isOpen: controlledIsOpen, onOpenChange: se
             const dateParts = data.date.split('-').map(p => parseInt(p, 10));
             const originalTransactionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
 
-            const groupId = doc(collection(firestore, 'some_path')).id; // Temporary ref to get a new ID
+            const groupId = doc(collection(firestore, `users/${user.uid}/transactions`)).id;
 
             for (let i = 0; i < installmentCount; i++) {
                 const newTransactionRef = doc(transactionsCollection);
