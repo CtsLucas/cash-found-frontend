@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 
-import { setDate } from 'date-fns';
-import { collection } from 'firebase/firestore';
+import { addMonths, format, setDate, startOfMonth } from 'date-fns';
+import { collection, query, where } from 'firebase/firestore';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -66,24 +66,53 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
   }, [firestore, user]);
   const { data: cards, isLoading: isLoadingCards } = useCollection<CardType>(cardsQuery);
 
+  // Buscar transações do mês anterior para calcular as faturas que vencem no mês atual
+  const previousMonthTransactionsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+
+    const previousMonth = addMonths(currentDate, -1);
+    const start = startOfMonth(previousMonth);
+    const end = startOfMonth(currentDate);
+
+    const startDate = format(start, 'yyyy-MM-dd');
+    const endDate = format(end, 'yyyy-MM-dd');
+
+    const q = query(
+      collection(firestore, `users/${user.uid}/transactions`),
+      where('date', '>=', startDate),
+      where('date', '<', endDate),
+      where('cardId', '!=', null),
+    );
+
+    return q;
+  }, [firestore, user, currentDate]);
+
+  const { data: previousMonthCardTransactions, isLoading: isLoadingPreviousMonth } =
+    useCollection<Transaction>(previousMonthTransactionsQuery);
+
   const { directDebits, cardInvoices } = useMemo(() => {
-    if (!transactions || !cards) {
+    if (!transactions || !cards || !previousMonthCardTransactions) {
       return { directDebits: [], cardInvoices: [] };
     }
 
     const expenseTransactions = transactions.filter((t) => t.type === 'expense');
 
+    // Débitos diretos são transações sem cartão (pagamentos diretos no mês)
     const directDebits = expenseTransactions.filter((t) => !t.cardId);
 
-    const cardInvoices = expenseTransactions
-      .filter((t) => t.cardId)
+    // Faturas de cartão: transações do mês ANTERIOR que vencem no mês ATUAL
+    // Exemplo: compras de Nov/2025 -> fatura vence em Dez/2025
+    const cardInvoices = previousMonthCardTransactions
+      .filter((t) => t.type === 'expense' && t.cardId)
       .reduce(
         (acc, t) => {
           if (!acc[t.cardId!]) {
             const card = cards.find((c) => c.id === t.cardId);
+            // A fatura vence no mês atual (currentDate) no dia especificado no cartão
+            const invoiceDueDate = card ? setDate(currentDate, card.dueDate) : null;
             acc[t.cardId!] = {
               cardName: card?.cardName || 'N/A',
-              dueDate: card ? setDate(currentDate, card.dueDate) : null,
+              dueDate: invoiceDueDate,
               total: 0,
             };
           }
@@ -94,7 +123,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
       );
 
     return { directDebits, cardInvoices: Object.values(cardInvoices) };
-  }, [transactions, cards, currentDate, t]);
+  }, [transactions, cards, currentDate, previousMonthCardTransactions]);
 
   const allDebits = [
     ...directDebits.map((d) => ({ ...d, isInvoice: false })),
@@ -116,7 +145,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
         <CardDescription>{t('dashboard.monthly_debits.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading || isLoadingCards ? (
+        {isLoading || isLoadingCards || isLoadingPreviousMonth ? (
           <MonthlyDebitsSkeleton />
         ) : (
           <Table>
