@@ -75,7 +75,7 @@ const getInvoiceMonths = (getMonthName: (month: number) => string) => {
     const monthName = getMonthName(date.getMonth());
     const year = date.getFullYear();
     months.push({
-      value: format(date, 'MMMM yyyy'),
+      value: format(date, 'yyyy-MM'), // Changed to yyyy-MM format for easier filtering
       label: `${monthName} ${year}`,
     });
   }
@@ -122,7 +122,7 @@ export function AddTransactionSheet({
   const { data: cards } = useCollection<Card>(cardsQuery);
 
   const invoiceMonths = React.useMemo(() => getInvoiceMonths(getMonthName), [getMonthName]);
-  const currentMonthValue = format(new Date(), 'MMMM yyyy');
+  const currentMonthValue = format(new Date(), 'yyyy-MM');
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -212,7 +212,10 @@ export function AddTransactionSheet({
       const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
 
       const installmentAmount = calculatedAmount / installmentCount;
-      const startingInvoiceDate = data.invoiceMonth ? new Date(data.invoiceMonth) : new Date();
+      // Parse invoiceMonth in format yyyy-MM
+      const startingInvoiceDate = data.invoiceMonth
+        ? new Date(`${data.invoiceMonth}-01`)
+        : new Date();
 
       const dateParts = data.date.split('-').map((p) => parseInt(p, 10));
       const originalTransactionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
@@ -232,7 +235,7 @@ export function AddTransactionSheet({
           deduction: 0,
           description: data.description,
           date: format(installmentDate, 'yyyy-MM-dd'),
-          invoiceMonth: format(invoiceDate, 'MMMM yyyy'),
+          invoiceMonth: format(invoiceDate, 'yyyy-MM'),
           installments: installmentCount,
           currentInstallment: i + 1,
           groupId,
@@ -506,9 +509,9 @@ export function AddTransactionSheet({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('invoice_month')}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select value={field.value} onValueChange={field.onChange}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="capitalize">
                               <SelectValue
                                 placeholder={t('transactions.form.invoice_month.placeholder')}
                               />
@@ -516,7 +519,11 @@ export function AddTransactionSheet({
                           </FormControl>
                           <SelectContent>
                             {invoiceMonths.map((month) => (
-                              <SelectItem key={month.value} value={month.value}>
+                              <SelectItem
+                                className="capitalize"
+                                key={month.value}
+                                value={month.value}
+                              >
                                 {month.label}
                               </SelectItem>
                             ))}

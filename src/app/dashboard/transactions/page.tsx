@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { addMonths, format, startOfMonth } from 'date-fns';
+import { addMonths, format, startOfMonth, subMonths } from 'date-fns';
 import { collection, orderBy, query, where } from 'firebase/firestore';
 import { File, PlusCircle } from 'lucide-react';
 
@@ -29,11 +29,14 @@ export default function TransactionsPage() {
   const transactionsQuery = useMemoFirebase(() => {
     if (!user) return null;
 
-    const start = startOfMonth(currentDate);
-    const nextMonthStart = startOfMonth(addMonths(currentDate, 1));
+    // Fetch transactions from 2 months before to 1 month after
+    // This ensures we get card transactions that may have invoiceMonth in current month
+    // but were purchased in previous months
+    const start = startOfMonth(subMonths(currentDate, 2));
+    const end = startOfMonth(addMonths(currentDate, 2));
 
     const startDate = format(start, 'yyyy-MM-dd');
-    const endDate = format(nextMonthStart, 'yyyy-MM-dd');
+    const endDate = format(end, 'yyyy-MM-dd');
 
     const q = query(
       collection(firestore, `users/${user.uid}/transactions`),
@@ -45,7 +48,26 @@ export default function TransactionsPage() {
     return q;
   }, [firestore, user, currentDate]);
 
-  const { data: transactions, isLoading } = useCollection<Transaction>(transactionsQuery);
+  const { data: allTransactions, isLoading } = useCollection<Transaction>(transactionsQuery);
+
+  // Filter transactions based on the current month
+  // For card transactions, use invoiceMonth; for others, use date
+  const transactions = useMemo(() => {
+    if (!allTransactions) return null;
+
+    const currentMonthStr = format(currentDate, 'yyyy-MM');
+
+    return allTransactions.filter((transaction) => {
+      // For card transactions, filter by invoiceMonth
+      if (transaction.cardId && transaction.invoiceMonth) {
+        return transaction.invoiceMonth === currentMonthStr;
+      }
+
+      // For non-card transactions (direct debits and income), filter by date
+      const transactionMonth = transaction.date.substring(0, 7); // Get yyyy-MM from yyyy-MM-dd
+      return transactionMonth === currentMonthStr;
+    });
+  }, [allTransactions, currentDate]);
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);

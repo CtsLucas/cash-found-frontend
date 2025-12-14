@@ -73,7 +73,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
       .reduce(
         (acc, t) => {
           const categoryName =
-            categories.find((c) => c.id === t.category)?.name || t('uncategorized');
+            categories.find((c) => c.id === t.category)?.name || 'N/A';
           if (!acc[categoryName]) {
             acc[categoryName] = 0;
           }
@@ -93,13 +93,16 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
 
     const config = {
       value: { label: t('value') },
-      ...data.reduce((acc, item) => {
-        acc[item.category] = {
-          label: item.category,
-          color: item.fill,
-        };
-        return acc;
-      }, {} as any),
+      ...data.reduce(
+        (acc, item) => {
+          acc[item.category] = {
+            label: item.category,
+            color: item.fill,
+          };
+          return acc;
+        },
+        {} as Record<string, { label: string; color: string }>,
+      ),
     };
 
     return { expenseData: data, chartConfig: config };

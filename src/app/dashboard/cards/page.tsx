@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { add, format } from 'date-fns';
+import { add, format, parse } from 'date-fns';
 import { collection, query, where } from 'firebase/firestore';
 import { Pencil } from 'lucide-react';
 import { PlusCircle } from 'lucide-react';
@@ -23,8 +23,6 @@ import {
   type CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -48,7 +46,16 @@ function InvoicesList({
 }) {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
-  const { t, formatCurrency, formatDate } = useLanguage();
+  const { t, formatCurrency, formatDate, getMonthName } = useLanguage();
+
+  // Helper function to format invoiceMonth (yyyy-MM) to display format
+  const formatInvoiceMonth = (invoiceMonth: string) => {
+    // Parse yyyy-MM format (e.g., "2026-01")
+    const date = parse(invoiceMonth, 'yyyy-MM', new Date());
+    const monthName = getMonthName(date.getMonth());
+    const year = date.getFullYear();
+    return `${monthName} ${year}`;
+  };
 
   const invoices = useMemo(() => {
     if (!transactions) return {};
@@ -74,13 +81,14 @@ function InvoicesList({
 
   const sortedInvoiceMonths = useMemo(() => {
     // Sort from oldest to newest
-    return Object.keys(invoices).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    // invoiceMonth is now in format yyyy-MM, so we can sort directly as strings
+    return Object.keys(invoices).sort((a, b) => a.localeCompare(b));
   }, [invoices]);
 
   useEffect(() => {
     if (sortedInvoiceMonths.length > 0 && !selectedInvoice) {
       const nextMonth = add(new Date(), { months: 1 });
-      const nextMonthString = format(nextMonth, 'MMMM yyyy');
+      const nextMonthString = format(nextMonth, 'yyyy-MM'); // Changed to yyyy-MM format
       const defaultSelection = sortedInvoiceMonths.includes(nextMonthString)
         ? nextMonthString
         : sortedInvoiceMonths[0];
@@ -126,12 +134,7 @@ function InvoicesList({
                     onClick={() => handleInvoiceSelect(month)}
                   >
                     <CardHeader className="flex flex-row items-center justify-between p-4">
-                      <CardTitle className="text-base">
-                        {new Date(month).toLocaleString('default', {
-                          month: 'long',
-                          year: 'numeric',
-                        })}
-                      </CardTitle>
+                      <CardTitle className="text-base capitalize">{formatInvoiceMonth(month)}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 pt-0">
                       <div className="text-2xl font-bold">{formatCurrency(invoice.total)}</div>
@@ -142,8 +145,6 @@ function InvoicesList({
             );
           })}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
       </Carousel>
       {selectedTransactions && selectedTransactions.length > 0 && (
         <Table>
