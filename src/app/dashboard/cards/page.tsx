@@ -250,14 +250,14 @@ export default function CardsPage() {
       {isLoadingCards ? (
         <CardsSkeleton />
       ) : cards && cards.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="flex flex-wrap gap-6 justify-center md:justify-start">
           {cards?.map((card) => {
             const spending = getCardSpending(card.id);
             const availableLimit = card.limit - spending;
             const isSelected = selectedCardId === card.id;
 
             return (
-              <div key={card.id}>
+              <div key={card.id} className="w-full max-w-[320px]">
                 <div
                   className="group relative flex aspect-[85.6/53.98] w-full cursor-pointer flex-col justify-between rounded-xl p-4 text-white shadow-lg transition-all duration-300"
                   style={{
