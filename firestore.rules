@@ -60,13 +60,6 @@ service cloud.firestore {
     function isExistingOwner(userId) {
       return isOwner(userId) && isExistingDoc();
     }
-    
-    /**
-     * Checks if the authenticated user's UID matches the provided userId for collection-level operations.
-     */
-    function isTransactionsOwner(userId) {
-      return isOwner(userId);
-    }
 
     /**
      * VALIDATION: Ensures that on user profile creation, the document's internal `id` field
@@ -152,18 +145,7 @@ service cloud.firestore {
        * @deny A user cannot query another user's transactions.
        */
       match /transactions/{transactionId} {
-        allow list: if isTransactionsOwner(userId);
-        allow get, write: if isOwner(userId);
-
-        /**
-         * @description Manages installment payments for a specific transaction.
-         * @path /users/{userId}/transactions/{transactionId}/installments/{installmentId}
-         * @allow A user can query installments for their own transaction.
-         * @deny A user cannot query another user's installments.
-         */
-        match /installments/{installmentId} {
-          allow read, write: if isOwner(userId);
-        }
+        allow read, write: if isOwner(userId);
       }
 
       /**
@@ -205,6 +187,18 @@ service cloud.firestore {
           allow read, write: if isOwner(userId);
         }
       }
+
+      /**
+       * @description Manages installment payments for a specific transaction.
+       * @path /users/{userId}/transactions/{transactionId}/installments/{installmentId}
+       * @allow A user can query installments for their own transaction.
+       * @deny A user cannot query another user's installments.
+       */
+      match /transactions/{transactionId}/installments/{installmentId} {
+        allow read, write: if isOwner(userId);
+      }
     }
   }
 }
+
+    
