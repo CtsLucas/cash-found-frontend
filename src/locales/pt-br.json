@@ -1,186 +1,186 @@
 {
-    "loading": "Carregando",
-    "error": "Erro",
-    "cancel": "Cancelar",
-    "continue": "Continuar",
-    "save": "Salvar",
-    "edit": "Editar",
-    "delete": "Excluir",
-    "export": "Exportar",
-    "add": "Adicionar",
-    "name": "Nome",
-    "description": "Descrição",
-    "date": "Data",
-    "amount": "Valor",
-    "category": "Categoria",
-    "categories": "Categorias",
-    "tag": "Tag",
-    "tags": "Tags",
-    "card": "Cartão",
-    "type": "Tipo",
-    "actions": "Ações",
-    "due_date": "Vencimento",
-    "due": "Vence",
-    "are_you_sure": "Você tem certeza absoluta?",
-    "no_results": "Nenhum resultado.",
-    "select_all": "Selecionar todos",
-    "select_row": "Selecionar linha",
-    "toggle_nav": "Alternar menu de navegação",
-    "profile": "Perfil",
-    "billing": "Cobrança",
-    "logout": "Sair",
-    "income": "Receita",
-    "expense": "Despesa",
-    "deduction": "Dedução",
-    "final_amount": "Valor Final",
-    "installments": "Parcelas",
-    "installment": "Parcela",
-    "invoice_month": "Mês da Fatura",
-    "invoice_for": "Fatura de",
-    "none": "Nenhum",
-    "unknown_card": "Cartão Desconhecido",
-    "uncategorized": "Sem Categoria",
-    "value": "Valor",
+  "loading": "Carregando",
+  "error": "Erro",
+  "cancel": "Cancelar",
+  "continue": "Continuar",
+  "save": "Salvar",
+  "edit": "Editar",
+  "delete": "Excluir",
+  "export": "Exportar",
+  "add": "Adicionar",
+  "name": "Nome",
+  "description": "Descrição",
+  "date": "Data",
+  "amount": "Valor",
+  "category": "Categoria",
+  "categories": "Categorias",
+  "tag": "Tag",
+  "tags": "Tags",
+  "card": "Cartão",
+  "type": "Tipo",
+  "actions": "Ações",
+  "due_date": "Vencimento",
+  "due": "Vence",
+  "are_you_sure": "Você tem certeza absoluta?",
+  "no_results": "Nenhum resultado.",
+  "select_all": "Selecionar todos",
+  "select_row": "Selecionar linha",
+  "toggle_nav": "Alternar menu de navegação",
+  "profile": "Perfil",
+  "billing": "Cobrança",
+  "logout": "Sair",
+  "income": "Receita",
+  "expense": "Despesa",
+  "deduction": "Dedução",
+  "final_amount": "Valor Final",
+  "installments": "Parcelas",
+  "installment": "Parcela",
+  "invoice_month": "Mês da Fatura",
+  "invoice_for": "Fatura de",
+  "none": "Nenhum",
+  "unknown_card": "Cartão Desconhecido",
+  "uncategorized": "Sem Categoria",
+  "value": "Valor",
 
-    "login": {
-        "subtitle": "Faça login para gerenciar suas finanças",
-        "with_google": "Login com Google"
+  "login": {
+    "subtitle": "Faça login para gerenciar suas finanças",
+    "with_google": "Login com Google"
+  },
+
+  "dashboard": {
+    "title": "Dashboard",
+    "total_income": "Receita Total",
+    "total_expenses": "Despesa Total",
+    "balance": "Saldo",
+    "balance_description": "Seu saldo da conta este mês",
+    "monthly_debits": {
+      "title": "Débitos Mensais",
+      "description": "Um resumo de suas despesas do mês, incluindo faturas de cartão de crédito.",
+      "empty": "Nenhum débito para este mês."
     },
-
-    "dashboard": {
-        "title": "Dashboard",
-        "total_income": "Receita Total",
-        "total_expenses": "Despesa Total",
-        "balance": "Saldo",
-        "balance_description": "Seu saldo da conta este mês",
-        "monthly_debits": {
-            "title": "Débitos Mensais",
-            "description": "Um resumo de suas despesas do mês, incluindo faturas de cartão de crédito.",
-            "empty": "Nenhum débito para este mês."
-        },
-        "recent_transactions": {
-            "title": "Transações Recentes",
-            "description": "Uma rápida olhada na sua atividade mais recente.",
-            "empty": "Nenhuma transação recente."
-        },
-        "expense_breakdown": {
-            "title": "Detalhamento de Despesas",
-            "empty": "Nenhum dado de despesa para este mês."
-        }
+    "recent_transactions": {
+      "title": "Transações Recentes",
+      "description": "Uma rápida olhada na sua atividade mais recente.",
+      "empty": "Nenhuma transação recente."
     },
-
-    "transactions": {
-        "title": "Transações",
-        "add_button": "Adicionar Transação",
-        "edit_title": "Editar Transação",
-        "add_title": "Adicionar nova transação",
-        "edit_description": "Atualize os detalhes do seu registro financeiro.",
-        "add_description": "Preencha os detalhes abaixo para adicionar um novo registro financeiro.",
-        "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente a transação.",
-        "delete_installment_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta transação e todas as suas parcelas relacionadas.",
-        "empty": {
-            "title": "Nenhuma transação encontrada",
-            "description": "Comece adicionando sua primeira transação para este período."
-        },
-        "form": {
-            "description": {
-                "placeholder": "Ex: Compras no mercado"
-            },
-            "category": {
-                "placeholder": "Selecione uma categoria"
-            },
-            "tags": {
-                "placeholder": "Selecione as tags",
-                "search_placeholder": "Buscar tags...",
-                "empty": "Nenhuma tag encontrada."
-            },
-            "card": {
-                "placeholder": "Selecione um cartão"
-            },
-            "invoice_month": {
-                "placeholder": "Selecione o mês da fatura"
-            }
-        }
-    },
-
-    "cards": {
-        "title": "Meus Cartões",
-        "add_button": "Adicionar Cartão",
-        "edit_title": "Editar Cartão",
-        "add_title": "Adicionar novo cartão",
-        "edit_description": "Atualize os detalhes do seu cartão.",
-        "add_description": "Preencha os detalhes abaixo para adicionar um novo cartão à sua carteira.",
-        "available_limit": "Limite Disponível",
-        "no_invoices": "Nenhuma fatura encontrada para este cartão.",
-        "invoices_for": "Faturas de",
-        "select_invoice": "Selecione uma fatura para ver suas transações.",
-        "empty": {
-            "title": "Nenhum cartão adicionado ainda",
-            "description": "Comece adicionando seu primeiro cartão de crédito ou débito para gerenciar suas finanças."
-        },
-        "form": {
-            "name": {
-                "label": "Nome do Cartão",
-                "placeholder": "Ex: Nubank"
-            },
-            "limit": {
-                "label": "Limite de Crédito"
-            },
-            "due_day": {
-                "label": "Dia do Vencimento"
-            },
-            "last4": {
-                "label": "Últimos 4 dígitos"
-            },
-            "color": {
-                "label": "Cor do Cartão"
-            }
-        }
-    },
-
-    "management": {
-        "title": "Gerenciamento",
-        "form": {
-            "add_description": "Preencha os detalhes abaixo para adicionar um novo item.",
-            "edit_description": "Atualize os detalhes do seu item."
-        },
-        "categories": {
-            "empty": {
-                "title": "Nenhuma categoria criada",
-                "description": "Comece criando sua primeira categoria."
-            },
-            "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta categoria."
-        },
-        "tags": {
-            "empty": {
-                "title": "Nenhuma tag criada",
-                "description": "Comece criando sua primeira tag."
-            },
-            "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta tag."
-        }
-    },
-
-    "settings": {
-        "title": "Configurações",
-        "description": "Gerencie as configurações e preferências da sua conta.",
-        "language": {
-            "title": "Idioma",
-            "description": "Escolha o idioma para a interface da aplicação.",
-            "label": "Idioma",
-            "select_placeholder": "Selecione um idioma"
-        },
-        "danger_zone": {
-            "title": "Zona de Perigo",
-            "description": "Essas ações são permanentes e não podem ser desfeitas.",
-            "delete": {
-                "button": "Excluir Todos os Dados",
-                "alert_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente todos os seus dados, incluindo transações, cartões, categorias e tags.",
-                "success_title": "Dados Excluídos",
-                "success_description": "Todos os seus dados foram excluídos com sucesso.",
-                "error_title": "Falha na Exclusão",
-                "error_description": "Não foi possível excluir os dados. Por favor, tente novamente.",
-                "error_description_generic": "Ocorreu um erro ao excluir seus dados. Por favor, tente novamente."
-            }
-        }
+    "expense_breakdown": {
+      "title": "Detalhamento de Despesas",
+      "empty": "Nenhum dado de despesa para este mês."
     }
+  },
+
+  "transactions": {
+    "title": "Transações",
+    "add_button": "Adicionar Transação",
+    "edit_title": "Editar Transação",
+    "add_title": "Adicionar nova transação",
+    "edit_description": "Atualize os detalhes do seu registro financeiro.",
+    "add_description": "Preencha os detalhes abaixo para adicionar um novo registro financeiro.",
+    "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente a transação.",
+    "delete_installment_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta transação e todas as suas parcelas relacionadas.",
+    "empty": {
+      "title": "Nenhuma transação encontrada",
+      "description": "Comece adicionando sua primeira transação para este período."
+    },
+    "form": {
+      "description": {
+        "placeholder": "Ex: Compras no mercado"
+      },
+      "category": {
+        "placeholder": "Selecione uma categoria"
+      },
+      "tags": {
+        "placeholder": "Selecione as tags",
+        "search_placeholder": "Buscar tags...",
+        "empty": "Nenhuma tag encontrada."
+      },
+      "card": {
+        "placeholder": "Selecione um cartão"
+      },
+      "invoice_month": {
+        "placeholder": "Selecione o mês da fatura"
+      }
+    }
+  },
+
+  "cards": {
+    "title": "Meus Cartões",
+    "add_button": "Adicionar Cartão",
+    "edit_title": "Editar Cartão",
+    "add_title": "Adicionar novo cartão",
+    "edit_description": "Atualize os detalhes do seu cartão.",
+    "add_description": "Preencha os detalhes abaixo para adicionar um novo cartão à sua carteira.",
+    "available_limit": "Limite Disponível",
+    "no_invoices": "Nenhuma fatura encontrada para este cartão.",
+    "invoices_for": "Faturas de",
+    "select_invoice": "Selecione uma fatura para ver suas transações.",
+    "empty": {
+      "title": "Nenhum cartão adicionado ainda",
+      "description": "Comece adicionando seu primeiro cartão de crédito ou débito para gerenciar suas finanças."
+    },
+    "form": {
+      "name": {
+        "label": "Nome do Cartão",
+        "placeholder": "Ex: Nubank"
+      },
+      "limit": {
+        "label": "Limite de Crédito"
+      },
+      "due_day": {
+        "label": "Dia do Vencimento"
+      },
+      "last4": {
+        "label": "Últimos 4 dígitos"
+      },
+      "color": {
+        "label": "Cor do Cartão"
+      }
+    }
+  },
+
+  "management": {
+    "title": "Gerenciamento",
+    "form": {
+      "add_description": "Preencha os detalhes abaixo para adicionar um novo item.",
+      "edit_description": "Atualize os detalhes do seu item."
+    },
+    "categories": {
+      "empty": {
+        "title": "Nenhuma categoria criada",
+        "description": "Comece criando sua primeira categoria."
+      },
+      "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta categoria."
+    },
+    "tags": {
+      "empty": {
+        "title": "Nenhuma tag criada",
+        "description": "Comece criando sua primeira tag."
+      },
+      "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta tag."
+    }
+  },
+
+  "settings": {
+    "title": "Configurações",
+    "description": "Gerencie as configurações e preferências da sua conta.",
+    "language": {
+      "title": "Idioma",
+      "description": "Escolha o idioma para a interface da aplicação.",
+      "label": "Idioma",
+      "select_placeholder": "Selecione um idioma"
+    },
+    "danger_zone": {
+      "title": "Zona de Perigo",
+      "description": "Essas ações são permanentes e não podem ser desfeitas.",
+      "delete": {
+        "button": "Excluir Todos os Dados",
+        "alert_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente todos os seus dados, incluindo transações, cartões, categorias e tags.",
+        "success_title": "Dados Excluídos",
+        "success_description": "Todos os seus dados foram excluídos com sucesso.",
+        "error_title": "Falha na Exclusão",
+        "error_description": "Não foi possível excluir os dados. Por favor, tente novamente.",
+        "error_description_generic": "Ocorreu um erro ao excluir seus dados. Por favor, tente novamente."
+      }
+    }
+  }
 }

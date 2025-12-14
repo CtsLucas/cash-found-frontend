@@ -1,13 +1,15 @@
 'use client';
-    
-import { useState, useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
+
 import {
-  DocumentReference,
-  onSnapshot,
   DocumentData,
-  FirestoreError,
+  DocumentReference,
   DocumentSnapshot,
+  FirestoreError,
+  onSnapshot,
 } from 'firebase/firestore';
+
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -20,14 +22,14 @@ type WithId<T> = T & { id: string };
  */
 export interface UseDocResult<T> {
   data: WithId<T> | null; // Document data with ID, or null.
-  isLoading: boolean;       // True if loading.
+  isLoading: boolean; // True if loading.
   error: FirestoreError | Error | null; // Error object, or null.
 }
 
 /**
  * React hook to subscribe to a single Firestore document in real-time.
  * Handles nullable references.
- * 
+ *
  * IMPORTANT! YOU MUST MEMOIZE the inputted docRef with useMemoFirebase or useMemo in your component, or you may cause infinite re-renders.
  *
  * @template T Optional type for document data. Defaults to any.
@@ -66,18 +68,18 @@ export function useDoc<T = any>(
         setError(null);
         setIsLoading(false);
       },
-      (error: FirestoreError) => {
+      (_error: FirestoreError) => {
         const contextualError = new FirestorePermissionError({
           operation: 'get',
           path: docRef.path,
-        })
+        });
 
-        setError(contextualError)
-        setData(null)
-        setIsLoading(false)
+        setError(contextualError);
+        setData(null);
+        setIsLoading(false);
 
         errorEmitter.emit('permission-error', contextualError);
-      }
+      },
     );
 
     return () => unsubscribe();

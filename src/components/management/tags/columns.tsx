@@ -1,20 +1,20 @@
+'use client';
 
-"use client"
+import { ColumnDef } from '@tanstack/react-table';
+import { TFunction } from 'i18next';
 
-import { ColumnDef } from "@tanstack/react-table"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Tag } from "@/lib/types"
-import { DataTableRowActions } from "./data-table-row-actions"
-import { TFunction } from "i18next"
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tag } from '@/lib/types';
+
+import { DataTableRowActions } from './data-table-row-actions';
 
 export const tagColumns = (onEdit: (tag: Tag) => void, t: TFunction): ColumnDef<Tag>[] => [
   {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label={t('select_all')}
@@ -33,21 +33,19 @@ export const tagColumns = (onEdit: (tag: Tag) => void, t: TFunction): ColumnDef<
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: 'name',
     header: t('name'),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="max-w-[300px] truncate font-medium">
-            {row.getValue("name")}
-          </span>
+          <span className="max-w-[300px] truncate font-medium">{row.getValue('name')}</span>
         </div>
-      )
+      );
     },
   },
   {
-    id: "actions",
+    id: 'actions',
     header: t('actions'),
     cell: ({ row }) => <DataTableRowActions row={row} onEdit={onEdit} />,
   },
-]
+];

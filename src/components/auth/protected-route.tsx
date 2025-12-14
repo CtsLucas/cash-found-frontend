@@ -1,9 +1,10 @@
-
 'use client';
 
-import { useUser } from '@/firebase';
+import { type ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect, type ReactNode } from 'react';
+
+import { useUser } from '@/firebase';
+
 import { useLanguage } from '../i18n/language-provider';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {

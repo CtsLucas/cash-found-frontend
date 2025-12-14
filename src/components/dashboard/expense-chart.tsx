@@ -1,28 +1,24 @@
+'use client';
 
-"use client"
+import { useMemo } from 'react';
 
-import { Pie, PieChart, Cell } from "recharts"
-import { useMemo } from "react"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { format } from 'date-fns';
+import { collection } from 'firebase/firestore';
+import { Cell, Pie, PieChart } from 'recharts';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-} from "@/components/ui/chart"
-import { Transaction, Category } from "@/lib/types"
-import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase"
-import { collection } from "firebase/firestore"
-import { Skeleton } from "../ui/skeleton"
-import { format } from "date-fns"
-import { useLanguage } from "../i18n/language-provider"
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { Category, Transaction } from '@/lib/types';
+
+import { useLanguage } from '../i18n/language-provider';
+import { Skeleton } from '../ui/skeleton';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -36,7 +32,7 @@ const CHART_COLORS = [
   '#6366f1',
   '#8b5cf6',
   '#ec4899',
-]
+];
 
 interface ExpenseChartProps {
   transactions: Transaction[] | null;
@@ -50,7 +46,7 @@ const ExpenseChartSkeleton = () => (
       <Skeleton className="h-6 w-40" />
       <Skeleton className="h-4 w-32" />
     </CardHeader>
-    <CardContent className="flex-1 pb-0 flex items-center justify-center">
+    <CardContent className="flex flex-1 items-center justify-center pb-0">
       <Skeleton className="aspect-square h-[250px] w-[250px] rounded-full" />
     </CardContent>
   </Card>
@@ -73,21 +69,27 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
     }
 
     const expensesByCategory = transactions
-      .filter(t => t.type === 'expense')
-      .reduce((acc, t) => {
-        const categoryName = categories.find(c => c.id === t.category)?.name || t('uncategorized');
-        if (!acc[categoryName]) {
-          acc[categoryName] = 0;
-        }
-        acc[categoryName] += t.amount - (t.deduction || 0);
-        return acc;
-      }, {} as Record<string, number>);
+      .filter((t) => t.type === 'expense')
+      .reduce(
+        (acc, t) => {
+          const categoryName =
+            categories.find((c) => c.id === t.category)?.name || t('uncategorized');
+          if (!acc[categoryName]) {
+            acc[categoryName] = 0;
+          }
+          acc[categoryName] += t.amount - (t.deduction || 0);
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
-    const data = Object.entries(expensesByCategory).map(([category, value], index) => ({
-      category,
-      value,
-      fill: CHART_COLORS[index % CHART_COLORS.length],
-    })).sort((a, b) => b.value - a.value);
+    const data = Object.entries(expensesByCategory)
+      .map(([category, value], index) => ({
+        category,
+        value,
+        fill: CHART_COLORS[index % CHART_COLORS.length],
+      }))
+      .sort((a, b) => b.value - a.value);
 
     const config = {
       value: { label: t('value') },
@@ -102,7 +104,7 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
 
     return { expenseData: data, chartConfig: config };
   }, [transactions, categories, t]);
-  
+
   if (isLoading) {
     return <ExpenseChartSkeleton />;
   }
@@ -115,21 +117,15 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         {expenseData.length > 0 ? (
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square max-h-[300px]"
-          >
+          <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
             <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
               <Pie data={expenseData} dataKey="value" nameKey="category" innerRadius={60}>
                 {expenseData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
-               <ChartLegend content={<ChartLegendContent nameKey="category" />} />
+              <ChartLegend content={<ChartLegendContent nameKey="category" />} />
             </PieChart>
           </ChartContainer>
         ) : (
@@ -139,5 +135,5 @@ export function ExpenseChart({ transactions, isLoading, date }: ExpenseChartProp
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

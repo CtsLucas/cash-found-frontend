@@ -1,8 +1,12 @@
+'use client';
 
-"use client"
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { signOut } from 'firebase/auth';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +15,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import Link from "next/link"
-import { useAuth, useUser } from "@/firebase"
-import { signOut } from "firebase/auth"
-import { useRouter } from "next/navigation"
-import { useLanguage } from "./i18n/language-provider"
+} from '@/components/ui/dropdown-menu';
+import { useAuth, useUser } from '@/firebase';
+
+import { useLanguage } from './i18n/language-provider';
 
 export function UserNav() {
   const { user } = useUser();
@@ -44,30 +46,20 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
-            </p>
+            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            {t('profile')}
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            {t('billing')}
-          </DropdownMenuItem>
+          <DropdownMenuItem>{t('profile')}</DropdownMenuItem>
+          <DropdownMenuItem>{t('billing')}</DropdownMenuItem>
           <Link href="/dashboard/settings">
-            <DropdownMenuItem>
-              {t('settings.title')}
-            </DropdownMenuItem>
+            <DropdownMenuItem>{t('settings.title')}</DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          {t('logout')}
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>{t('logout')}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

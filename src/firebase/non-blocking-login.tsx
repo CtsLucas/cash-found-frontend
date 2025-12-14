@@ -1,13 +1,11 @@
-
 'use client';
 import {
   Auth, // Import Auth type for type hinting
-  signInAnonymously,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   GoogleAuthProvider,
+  signInAnonymously,
+  signInWithEmailAndPassword,
   signInWithPopup,
-  signInWithRedirect,
   UserCredential,
   // Assume getAuth and app are initialized elsewhere
 } from 'firebase/auth';

@@ -1,10 +1,12 @@
+'use client';
 
-"use client"
+import { useState } from 'react';
 
-import { Row } from "@tanstack/react-table"
-import { Pencil, Trash2 } from "lucide-react"
+import { Row } from '@tanstack/react-table';
+import { doc } from 'firebase/firestore';
+import { Pencil, Trash2 } from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
+import { useLanguage } from '@/components/i18n/language-provider';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,26 +17,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Category } from "@/lib/types"
-import { useFirestore, useUser } from "@/firebase"
-import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
-import { doc } from "firebase/firestore"
-import { useState } from "react"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useLanguage } from "@/components/i18n/language-provider"
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { useFirestore, useUser } from '@/firebase';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { Category } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 interface DataTableRowActionsProps<TData> {
-  row: Row<TData>
+  row: Row<TData>;
   onEdit: (data: TData) => void;
 }
 
 export function DataTableRowActions<TData extends Category>({
   row,
-  onEdit
+  onEdit,
 }: DataTableRowActionsProps<TData>) {
-  const item = row.original
+  const item = row.original;
   const firestore = useFirestore();
   const { user } = useUser();
   const { t } = useLanguage();
@@ -46,22 +46,21 @@ export function DataTableRowActions<TData extends Category>({
       deleteDocumentNonBlocking(itemRef);
       setIsDeleteDialogOpen(false);
     }
-  }
+  };
 
   return (
     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
       <div className="flex items-center space-x-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => onEdit(item)}
-        >
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)}>
           <Pencil className="h-4 w-4" />
           <span className="sr-only">{t('edit')}</span>
         </Button>
         <AlertDialogTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive"
+          >
             <Trash2 className="h-4 w-4" />
             <span className="sr-only">{t('delete')}</span>
           </Button>
@@ -77,9 +76,14 @@ export function DataTableRowActions<TData extends Category>({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className={cn(buttonVariants({ variant: "destructive" }))}>{t('continue')}</AlertDialogAction>
+          <AlertDialogAction
+            onClick={handleDelete}
+            className={cn(buttonVariants({ variant: 'destructive' }))}
+          >
+            {t('continue')}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

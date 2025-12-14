@@ -1,13 +1,15 @@
+'use client';
 
-'use client'
+import { useMemo } from 'react';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, Scale } from "lucide-react";
-import { Transaction } from "@/lib/types";
-import { useMemo } from "react";
-import { Skeleton } from "../ui/skeleton";
-import { cn } from "@/lib/utils";
-import { useLanguage } from "../i18n/language-provider";
+import { ArrowDown, ArrowUp, Scale } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Transaction } from '@/lib/types';
+import { cn } from '@/lib/utils';
+
+import { useLanguage } from '../i18n/language-provider';
+import { Skeleton } from '../ui/skeleton';
 
 interface OverviewCardsProps {
   transactions: Transaction[] | null;
@@ -24,7 +26,7 @@ const OverviewSkeleton = () => (
         </CardHeader>
         <CardContent>
           <Skeleton className="h-7 w-32" />
-          <Skeleton className="h-3 w-40 mt-2" />
+          <Skeleton className="mt-2 h-3 w-40" />
         </CardContent>
       </Card>
     ))}
@@ -38,15 +40,19 @@ export function OverviewCards({ transactions, isLoading }: OverviewCardsProps) {
     if (!transactions) {
       return { totalIncome: 0, totalExpenses: 0, balance: 0 };
     }
-    const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-    const expenses = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + (t.amount - (t.deduction || 0)), 0);
+    const income = transactions
+      .filter((t) => t.type === 'income')
+      .reduce((acc, t) => acc + t.amount, 0);
+    const expenses = transactions
+      .filter((t) => t.type === 'expense')
+      .reduce((acc, t) => acc + (t.amount - (t.deduction || 0)), 0);
     return {
       totalIncome: income,
       totalExpenses: expenses,
-      balance: income - expenses
+      balance: income - expenses,
     };
   }, [transactions]);
-  
+
   if (isLoading) {
     return <OverviewSkeleton />;
   }
@@ -77,7 +83,14 @@ export function OverviewCards({ transactions, isLoading }: OverviewCardsProps) {
           <Scale className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className={cn("text-2xl font-bold", balance < 0 ? 'text-destructive' : 'text-green-600')}>{formatCurrency(balance)}</div>
+          <div
+            className={cn(
+              'text-2xl font-bold',
+              balance < 0 ? 'text-destructive' : 'text-green-600',
+            )}
+          >
+            {formatCurrency(balance)}
+          </div>
           <p className="text-xs text-muted-foreground">{t('dashboard.balance_description')}</p>
         </CardContent>
       </Card>

@@ -1,29 +1,18 @@
-
 'use client';
 
-import Link from "next/link";
-import {
-  Coins,
-  Menu,
-} from "lucide-react";
+import Link from 'next/link';
 
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { UserNav } from "@/components/user-nav";
-import { MainNav } from "@/components/main-nav";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ProtectedRoute } from "@/components/auth/protected-route";
-import { useLanguage } from "@/components/i18n/language-provider";
+import { Coins, Menu } from 'lucide-react';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { useLanguage } from '@/components/i18n/language-provider';
+import { MainNav } from '@/components/main-nav';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { UserNav } from '@/components/user-nav';
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   return (
     <ProtectedRoute>
@@ -31,7 +20,7 @@ export default function DashboardLayout({
         <div className="hidden border-r bg-muted/40 md:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-              <Link href="/" className="flex items-center gap-2 font-semibold font-headline">
+              <Link href="/" className="flex items-center gap-2 font-headline font-semibold">
                 <Coins className="h-6 w-6 text-primary" />
                 <span className="">CashFound</span>
               </Link>
@@ -47,11 +36,7 @@ export default function DashboardLayout({
           <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
             <Sheet>
               <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="shrink-0 md:hidden"
-                >
+                <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">{t('toggle_nav')}</span>
                 </Button>
@@ -62,12 +47,10 @@ export default function DashboardLayout({
                 </TooltipProvider>
               </SheetContent>
             </Sheet>
-            <div className="w-full flex-1">
-              {/* Can add a search bar here if needed */}
-            </div>
+            <div className="w-full flex-1">{/* Can add a search bar here if needed */}</div>
             <UserNav />
           </header>
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
+          <main className="flex flex-1 flex-col gap-4 bg-background p-4 lg:gap-6 lg:p-6">
             {children}
           </main>
         </div>

@@ -1,5 +1,3 @@
-
-
 export type Transaction = {
   id: string;
   date: string;
@@ -7,7 +5,7 @@ export type Transaction = {
   amount: number;
   deduction?: number;
   type: 'income' | 'expense';
-  category: string; 
+  category: string;
   tagIds?: string[];
   userId?: string;
   cardId?: string;
@@ -28,7 +26,7 @@ export type Tag = {
   id: string;
   name: string;
   userId?: string;
-}
+};
 
 export type Card = {
   id: string;
@@ -50,12 +48,11 @@ export type Invoice = {
 };
 
 export type Installment = {
-    id: string;
-    transactionId: string;
-    dueDate: string;
-    amount: number;
-    isPaid: boolean;
+  id: string;
+  transactionId: string;
+  dueDate: string;
+  amount: number;
+  isPaid: boolean;
 };
 
 export type Locale = 'en' | 'pt-BR';
-    

@@ -1,27 +1,33 @@
+'use client';
 
-'use client'
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import en from '@/locales/en.json';
-import ptBR from '@/locales/pt-br.json';
-import { Locale } from '@/lib/types';
 import { get } from 'lodash';
 
-type Translations = typeof en;
+import { Locale } from '@/lib/types';
+import en from '@/locales/en.json';
+import ptBR from '@/locales/pt-br.json';
 
 interface LanguageContextType {
   locale: Locale;
-  setLanguage: (language: Locale) => void;
-  t: (key: string) => string;
-  formatCurrency: (amount: number) => string;
-  formatDate: (dateString: string) => string;
-  getMonthName: (monthIndex: number) => string;
+  setLanguage: (_language: Locale) => void;
+  t: (_key: string) => string;
+  formatCurrency: (_amount: number) => string;
+  formatDate: (_dateString: string) => string;
+  getMonthName: (_monthIndex: number) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const translations = {
-  'en': en,
+  en,
   'pt-BR': ptBR,
 };
 
@@ -42,45 +48,58 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     localStorage.setItem('language', newLocale);
   };
 
-  const t = useCallback((key: string): string => {
-    const translation = get(translations[locale], key);
-    return translation || key;
-  }, [locale]);
+  const t = useCallback(
+    (key: string): string => {
+      const translation = get(translations[locale], key);
+      return translation || key;
+    },
+    [locale],
+  );
 
+  const formatCurrency = useCallback(
+    (amount: number) => {
+      const currency = locale === 'en' ? 'USD' : 'BRL';
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+      }).format(amount);
+    },
+    [locale],
+  );
 
-  const formatCurrency = useCallback((amount: number) => {
-    const currency = locale === 'en' ? 'USD' : 'BRL';
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency,
-    }).format(amount);
-  }, [locale]);
-  
-  const formatDate = useCallback((dateString: string) => {
-    // The date string from the data is 'YYYY-MM-DD'.
-    // To avoid timezone issues where this might be interpreted as the previous day,
-    // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
-    const date = new Date(`${dateString}T00:00:00Z`);
-    return new Intl.DateTimeFormat(locale, { 
-      timeZone: 'UTC',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric' 
-    }).format(date);
-  }, [locale]);
+  const formatDate = useCallback(
+    (dateString: string) => {
+      // The date string from the data is 'YYYY-MM-DD'.
+      // To avoid timezone issues where this might be interpreted as the previous day,
+      // we explicitly tell JavaScript to treat it as UTC by adding time and Z.
+      const date = new Date(`${dateString}T00:00:00Z`);
+      return new Intl.DateTimeFormat(locale, {
+        timeZone: 'UTC',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }).format(date);
+    },
+    [locale],
+  );
 
-  const getMonthName = useCallback((monthIndex: number) => {
-    const date = new Date();
-    date.setMonth(monthIndex);
-    return date.toLocaleString(locale, { month: 'long' });
-  }, [locale]);
+  const getMonthName = useCallback(
+    (monthIndex: number) => {
+      const date = new Date();
+      date.setMonth(monthIndex);
+      return date.toLocaleString(locale, { month: 'long' });
+    },
+    [locale],
+  );
 
   if (!isMounted) {
     return null; // Or a loading spinner
   }
 
   return (
-    <LanguageContext.Provider value={{ locale, setLanguage, t, formatCurrency, formatDate, getMonthName }}>
+    <LanguageContext.Provider
+      value={{ locale, setLanguage, t, formatCurrency, formatDate, getMonthName }}
+    >
       {children}
     </LanguageContext.Provider>
   );

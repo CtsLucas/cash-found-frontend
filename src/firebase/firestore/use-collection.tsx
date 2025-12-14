@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import {
-  Query,
-  onSnapshot,
+  CollectionReference,
   DocumentData,
   FirestoreError,
+  onSnapshot,
+  Query,
   QuerySnapshot,
-  CollectionReference,
 } from 'firebase/firestore';
+
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -21,7 +23,7 @@ export type WithId<T> = T & { id: string };
  */
 export interface UseCollectionResult<T> {
   data: WithId<T>[] | null; // Document data with ID, or null.
-  isLoading: boolean;       // True if loading.
+  isLoading: boolean; // True if loading.
   error: FirestoreError | Error | null; // Error object, or null.
 }
 
@@ -33,24 +35,24 @@ export interface InternalQuery extends Query<DocumentData> {
     path: {
       canonicalString(): string;
       toString(): string;
-    }
-  }
+    };
+  };
 }
 
 /**
  * React hook to subscribe to a Firestore collection or query in real-time.
  * Handles nullable references/queries.
- * 
+ *
  *
  * IMPORTANT! YOU MUST MEMOIZE the inputted targetRefOrQuery with useMemoFirebase or useMemo in your component, or you may cause infinite re-renders.
- *  
+ *
  * @template T Optional type for document data. Defaults to any.
  * @param {CollectionReference<DocumentData> | Query<DocumentData> | null | undefined} targetRefOrQuery -
  * The Firestore CollectionReference or Query. Waits if null/undefined.
  * @returns {UseCollectionResult<T>} Object with data, isLoading, error.
  */
 export function useCollection<T = any>(
-    targetRefOrQuery: CollectionReference<DocumentData> | Query<DocumentData> | null | undefined,
+  targetRefOrQuery: CollectionReference<DocumentData> | Query<DocumentData> | null | undefined,
 ): UseCollectionResult<T> {
   type ResultItemType = WithId<T>;
   type StateDataType = ResultItemType[] | null;
@@ -81,23 +83,23 @@ export function useCollection<T = any>(
         setError(null);
         setIsLoading(false);
       },
-      (error: FirestoreError) => {
+      (_error: FirestoreError) => {
         const path: string =
           targetRefOrQuery.type === 'collection'
             ? (targetRefOrQuery as CollectionReference).path
-            : (targetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
+            : (targetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
 
         const contextualError = new FirestorePermissionError({
           operation: 'list',
           path,
-        })
+        });
 
-        setError(contextualError)
-        setData(null)
-        setIsLoading(false)
+        setError(contextualError);
+        setData(null);
+        setIsLoading(false);
 
         errorEmitter.emit('permission-error', contextualError);
-      }
+      },
     );
 
     return () => unsubscribe();

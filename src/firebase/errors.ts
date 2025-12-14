@@ -51,12 +51,15 @@ function buildAuthObject(currentUser: User | null): FirebaseAuthObject | null {
     phone_number: currentUser.phoneNumber,
     sub: currentUser.uid,
     firebase: {
-      identities: currentUser.providerData.reduce((acc, p) => {
-        if (p.providerId) {
-          acc[p.providerId] = [p.uid];
-        }
-        return acc;
-      }, {} as Record<string, string[]>),
+      identities: currentUser.providerData.reduce(
+        (acc, p) => {
+          if (p.providerId) {
+            acc[p.providerId] = [p.uid];
+          }
+          return acc;
+        },
+        {} as Record<string, string[]>,
+      ),
       sign_in_provider: currentUser.providerData[0]?.providerId || 'custom',
       tenant: currentUser.tenantId,
     },
@@ -64,7 +67,7 @@ function buildAuthObject(currentUser: User | null): FirebaseAuthObject | null {
 
   return {
     uid: currentUser.uid,
-    token: token,
+    token,
   };
 }
 

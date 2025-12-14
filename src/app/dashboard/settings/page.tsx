@@ -1,9 +1,10 @@
+'use client';
 
-'use client'
+import { useRouter } from 'next/navigation';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import { collection, getDocs, writeBatch } from 'firebase/firestore';
+
+import { useLanguage } from '@/components/i18n/language-provider';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,16 +15,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { useFirestore, useUser } from "@/firebase"
-import { collection, deleteDoc, getDocs, writeBatch } from "firebase/firestore"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { useLanguage } from "@/components/i18n/language-provider"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Locale } from "@/lib/types"
+} from '@/components/ui/alert-dialog';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { useFirestore, useUser } from '@/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { Locale } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
   const firestore = useFirestore();
@@ -35,7 +42,7 @@ export default function SettingsPage() {
   const handleDeleteAllData = async () => {
     if (!user || !firestore) {
       toast({
-        variant: "destructive",
+        variant: 'destructive',
         title: t('error'),
         description: t('settings.danger_zone.delete.error_description'),
       });
@@ -59,11 +66,11 @@ export default function SettingsPage() {
       for (const cardDoc of cardsSnapshot.docs) {
         const invoicesRef = collection(firestore, `users/${user.uid}/cards/${cardDoc.id}/invoices`);
         const invoicesSnapshot = await getDocs(invoicesRef);
-        invoicesSnapshot.forEach(invoiceDoc => {
-            batch.delete(invoiceDoc.ref);
-        })
+        invoicesSnapshot.forEach((invoiceDoc) => {
+          batch.delete(invoiceDoc.ref);
+        });
       }
-      
+
       await batch.commit();
 
       toast({
@@ -73,11 +80,10 @@ export default function SettingsPage() {
 
       // Optional: redirect user after deletion
       router.push('/dashboard');
-
     } catch (error) {
-      console.error("Error deleting user data:", error);
+      console.error('Error deleting user data:', error);
       toast({
-        variant: "destructive",
+        variant: 'destructive',
         title: t('settings.danger_zone.delete.error_title'),
         description: t('settings.danger_zone.delete.error_description_generic'),
       });
@@ -87,19 +93,15 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">{t('settings.title')}</h1>
-        <p className="text-muted-foreground">
-          {t('settings.description')}
-        </p>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">{t('settings.title')}</h1>
+        <p className="text-muted-foreground">{t('settings.description')}</p>
       </div>
       <Separator />
 
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.language.title')}</CardTitle>
-          <CardDescription>
-            {t('settings.language.description')}
-          </CardDescription>
+          <CardDescription>{t('settings.language.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="w-full max-w-sm">
@@ -117,12 +119,10 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-       <Card className="border-destructive">
+      <Card className="border-destructive">
         <CardHeader>
           <CardTitle className="text-destructive">{t('settings.danger_zone.title')}</CardTitle>
-          <CardDescription>
-            {t('settings.danger_zone.description')}
-          </CardDescription>
+          <CardDescription>{t('settings.danger_zone.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <AlertDialog>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
                 <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDeleteAllData}
-                  className={cn(buttonVariants({ variant: "destructive" }))}
+                  className={cn(buttonVariants({ variant: 'destructive' }))}
                 >
                   {t('continue')}
                 </AlertDialogAction>
@@ -150,5 +150,5 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

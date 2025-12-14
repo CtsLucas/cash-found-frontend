@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+.idx
+*.min.js
+*.min.css
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+.git
+.firebase
+firestore.indexes.json
+firestore.rules

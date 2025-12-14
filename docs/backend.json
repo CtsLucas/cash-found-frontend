@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -25,12 +24,7 @@
           "description": "Full name of the user."
         }
       },
-      "required": [
-        "id",
-        "googleId",
-        "email",
-        "name"
-      ]
+      "required": ["id", "googleId", "email", "name"]
     },
     "Transaction": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -71,14 +65,7 @@
           }
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "date",
-        "amount",
-        "description",
-        "categoryId"
-      ]
+      "required": ["id", "userId", "date", "amount", "description", "categoryId"]
     },
     "Category": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -103,11 +90,7 @@
           "description": "Reference to User. (Relationship: User 1:N Category).  This represents the user who created the category. Null implies a default/system category."
         }
       },
-      "required": [
-        "id",
-        "name",
-        "description"
-      ]
+      "required": ["id", "name", "description"]
     },
     "Tag": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -128,10 +111,7 @@
           "description": "Reference to User. (Relationship: User 1:N Tag). This represents the user who created the tag. Null implies a default/system tag."
         }
       },
-      "required": [
-        "id",
-        "name"
-      ]
+      "required": ["id", "name"]
     },
     "Installment": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -161,13 +141,7 @@
           "description": "Indicates whether the installment has been paid."
         }
       },
-      "required": [
-        "id",
-        "transactionId",
-        "dueDate",
-        "amount",
-        "isPaid"
-      ]
+      "required": ["id", "transactionId", "dueDate", "amount", "isPaid"]
     },
     "Card": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -200,14 +174,7 @@
           "description": "Available credit on the card."
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "cardNumber",
-        "dueDate",
-        "creditLimit",
-        "availableCredit"
-      ]
+      "required": ["id", "userId", "cardNumber", "dueDate", "creditLimit", "availableCredit"]
     },
     "Invoice": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -246,21 +213,11 @@
           "description": "Indicates whether the invoice has been paid."
         }
       },
-      "required": [
-        "id",
-        "cardId",
-        "transactionId",
-        "invoiceDate",
-        "amountDue",
-        "dueDate",
-        "isPaid"
-      ]
+      "required": ["id", "cardId", "transactionId", "invoiceDate", "amountDue", "dueDate", "isPaid"]
     }
   },
   "auth": {
-    "providers": [
-      "google.com"
-    ]
+    "providers": ["google.com"]
   },
   "firestore": {
     "structure": [
