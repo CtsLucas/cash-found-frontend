@@ -82,7 +82,7 @@ export function MonthlyDebits({ transactions, isLoading, currentDate }: MonthlyD
           if (!acc[t.cardId!]) {
             const card = cards.find((c) => c.id === t.cardId);
             acc[t.cardId!] = {
-              cardName: card?.cardName || t('unknown_card'),
+              cardName: card?.cardName || 'N/A',
               dueDate: card ? setDate(currentDate, card.dueDate) : null,
               total: 0,
             };
