@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/sheet';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useToast } from '@/hooks/use-toast';
 import { Card, Category, Tag, Transaction } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -99,6 +100,7 @@ export function AddTransactionSheet({
   const { user } = useUser();
   const { t, getMonthName } = useLanguage();
   const [isInternalOpen, setInternalOpen] = React.useState(false);
+  const { toast } = useToast();
 
   const isOpen = controlledIsOpen ?? isInternalOpen;
   const setIsOpen = setControlledIsOpen ?? setInternalOpen;
@@ -184,71 +186,85 @@ export function AddTransactionSheet({
   const onSubmit = async (data: TransactionFormValues) => {
     if (!user || !firestore) return;
 
-    const dataToSave: Partial<Transaction> = { ...data };
-    if (data.type === 'income' || data.cardId === 'none') {
-      delete dataToSave.cardId;
-      delete dataToSave.invoiceMonth;
-      delete dataToSave.deduction;
-      delete dataToSave.installments;
-    }
-
-    if (data.cardId === 'none') {
-      dataToSave.cardId = '';
-    }
-
-    const installmentCount = data.installments || 1;
-    const isEditing = !!editingTransaction;
-
-    if (isEditing) {
-      if (editingTransaction?.id) {
-        const transactionRef = doc(
-          firestore,
-          `users/${user.uid}/transactions/${editingTransaction.id}`,
-        );
-        setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
+    try {
+      const dataToSave: Partial<Transaction> = { ...data };
+      if (data.type === 'income' || data.cardId === 'none') {
+        delete dataToSave.cardId;
+        delete dataToSave.invoiceMonth;
+        delete dataToSave.deduction;
+        delete dataToSave.installments;
       }
-    } else if (isCardExpense && installmentCount > 1) {
-      const batch = writeBatch(firestore);
-      const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
 
-      const installmentAmount = calculatedAmount / installmentCount;
-      // Parse invoiceMonth in format yyyy-MM
-      const startingInvoiceDate = data.invoiceMonth
-        ? new Date(`${data.invoiceMonth}-01`)
-        : new Date();
-
-      const dateParts = data.date.split('-').map((p) => parseInt(p, 10));
-      const originalTransactionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-
-      const groupId = doc(collection(firestore, `users/${user.uid}/transactions`)).id;
-
-      for (let i = 0; i < installmentCount; i++) {
-        const newTransactionRef = doc(transactionsCollection);
-
-        const installmentDate = add(originalTransactionDate, { months: i });
-        const invoiceDate = add(startingInvoiceDate, { months: i });
-
-        const installmentTransaction = {
-          ...dataToSave,
-          id: newTransactionRef.id,
-          amount: installmentAmount,
-          deduction: 0,
-          description: data.description,
-          date: format(installmentDate, 'yyyy-MM-dd'),
-          invoiceMonth: format(invoiceDate, 'yyyy-MM'),
-          installments: installmentCount,
-          currentInstallment: i + 1,
-          groupId,
-        };
-        batch.set(newTransactionRef, installmentTransaction);
+      if (data.cardId === 'none') {
+        dataToSave.cardId = '';
       }
-      await batch.commit();
-    } else {
-      const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
-      addDocumentNonBlocking(transactionsCollection, dataToSave);
-    }
 
-    setIsOpen(false);
+      const installmentCount = data.installments || 1;
+      const isEditing = !!editingTransaction;
+
+      if (isEditing) {
+        if (editingTransaction?.id) {
+          const transactionRef = doc(
+            firestore,
+            `users/${user.uid}/transactions/${editingTransaction.id}`,
+          );
+          setDocumentNonBlocking(transactionRef, dataToSave, { merge: true });
+        }
+      } else if (isCardExpense && installmentCount > 1) {
+        const batch = writeBatch(firestore);
+        const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
+
+        const installmentAmount = calculatedAmount / installmentCount;
+        // Parse invoiceMonth in format yyyy-MM
+        const startingInvoiceDate = data.invoiceMonth
+          ? new Date(`${data.invoiceMonth}-01`)
+          : new Date();
+
+        const dateParts = data.date.split('-').map((p) => parseInt(p, 10));
+        const originalTransactionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+        const groupId = doc(collection(firestore, `users/${user.uid}/transactions`)).id;
+
+        for (let i = 0; i < installmentCount; i++) {
+          const newTransactionRef = doc(transactionsCollection);
+
+          const installmentDate = add(originalTransactionDate, { months: i });
+          const invoiceDate = add(startingInvoiceDate, { months: i });
+
+          const installmentTransaction = {
+            ...dataToSave,
+            id: newTransactionRef.id,
+            amount: installmentAmount,
+            deduction: 0,
+            description: data.description,
+            date: format(installmentDate, 'yyyy-MM-dd'),
+            invoiceMonth: format(invoiceDate, 'yyyy-MM'),
+            installments: installmentCount,
+            currentInstallment: i + 1,
+            groupId,
+          };
+          batch.set(newTransactionRef, installmentTransaction);
+        }
+        await batch.commit();
+      } else {
+        const transactionsCollection = collection(firestore, `users/${user.uid}/transactions`);
+        addDocumentNonBlocking(transactionsCollection, dataToSave);
+      }
+
+      toast({
+        variant: 'success',
+        title: t('transactions.messages.create.success.title'),
+        description: t('transactions.messages.create.success.description'),
+      });
+    } catch (_error) {
+      toast({
+        variant: 'destructive',
+        title: t('transactions.messages.create.error.title'),
+        description: t('transactions.messages.create.error.description'),
+      });
+    } finally {
+      setIsOpen(false);
+    }
   };
 
   const isEditing = !!editingTransaction;
@@ -433,14 +449,16 @@ export function AddTransactionSheet({
               control={form.control}
               name="tagIds"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-3">
                   <FormLabel>{t('tags')}</FormLabel>
-                  <MultiSelect
-                    options={tagOptions}
-                    selected={field.value || []}
-                    onChange={field.onChange}
-                    placeholder={t('transactions.form.tags.placeholder')}
-                  />
+                  <FormControl>
+                    <MultiSelect
+                      options={tagOptions}
+                      selected={field.value || []}
+                      onChange={(value: string[]) => field.onChange(value)}
+                      placeholder={t('transactions.form.tags.placeholder')}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

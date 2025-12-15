@@ -41,12 +41,10 @@
   "unknown_card": "Cartão Desconhecido",
   "uncategorized": "Sem Categoria",
   "value": "Valor",
-
   "login": {
     "subtitle": "Faça login para gerenciar suas finanças",
     "with_google": "Login com Google"
   },
-
   "dashboard": {
     "title": "Dashboard",
     "total_income": "Receita Total",
@@ -68,7 +66,6 @@
       "empty": "Nenhum dado de despesa para este mês."
     }
   },
-
   "transactions": {
     "title": "Transações",
     "add_button": "Adicionar Transação",
@@ -100,9 +97,30 @@
       "invoice_month": {
         "placeholder": "Selecione o mês da fatura"
       }
+    },
+    "messages": {
+      "create": {
+        "success": {
+          "title": "Transação Criada",
+          "description": "A transação foi criada com sucesso."
+        },
+        "error": {
+          "title": "Falha na Criação de Transação",
+          "description": "Não foi possível criar a transação. Por favor, tente novamente."
+        }
+      },
+      "delete": {
+        "success": {
+          "title": "Transação Excluída",
+          "description": "A transação foi excluída com sucesso."
+        },
+        "error": {
+          "title": "Falha na Exclusão de Transação",
+          "description": "Não foi possível excluir a transação. Por favor, tente novamente."
+        }
+      }
     }
   },
-
   "cards": {
     "title": "Meus Cartões",
     "add_button": "Adicionar Cartão",
@@ -137,7 +155,6 @@
       }
     }
   },
-
   "management": {
     "title": "Gerenciamento",
     "form": {
@@ -159,7 +176,6 @@
       "delete_description": "Esta ação não pode ser desfeita. Isso excluirá permanentemente esta tag."
     }
   },
-
   "settings": {
     "title": "Configurações",
     "description": "Gerencie as configurações e preferências da sua conta.",

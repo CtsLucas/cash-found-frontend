@@ -41,12 +41,10 @@
   "unknown_card": "Unknown Card",
   "uncategorized": "Uncategorized",
   "value": "Value",
-
   "login": {
     "subtitle": "Sign in to manage your finances",
     "with_google": "Login with Google"
   },
-
   "dashboard": {
     "title": "Dashboard",
     "total_income": "Total Income",
@@ -68,7 +66,6 @@
       "empty": "No expense data for this month."
     }
   },
-
   "transactions": {
     "title": "Transactions",
     "add_button": "Add Transaction",
@@ -99,10 +96,29 @@
       },
       "invoice_month": {
         "placeholder": "Select an invoice month"
+      },
+      "create": {
+        "success": {
+          "title": "Transaction Created",
+          "description": "The transaction was created successfully."
+        },
+        "error": {
+          "title": "Failed to Create Transaction",
+          "description": "Failed to create the transaction. Please try again."
+        }
+      },
+      "delete": {
+        "success": {
+          "title": "Transaction Deleted",
+          "description": "The transaction was deleted successfully."
+        },
+        "error": {
+          "title": "Failed to Delete Transaction",
+          "description": "Failed to delete the transaction. Please try again."
+        }
       }
     }
   },
-
   "cards": {
     "title": "My Cards",
     "add_button": "Add Card",
@@ -137,7 +153,6 @@
       }
     }
   },
-
   "management": {
     "title": "Management",
     "form": {
@@ -159,7 +174,6 @@
       "delete_description": "This action cannot be undone. This will permanently delete this tag."
     }
   },
-
   "settings": {
     "title": "Settings",
     "description": "Manage your account settings and preferences.",

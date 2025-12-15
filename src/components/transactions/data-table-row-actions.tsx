@@ -20,6 +20,7 @@ import {
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useFirestore, useUser } from '@/firebase';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useToast } from '@/hooks/use-toast';
 import { Transaction } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -38,28 +39,43 @@ export function DataTableRowActions<TData extends Transaction>({
   const firestore = useFirestore();
   const { user } = useUser();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
     if (!user || !firestore) return;
 
-    if (transaction.groupId) {
-      const batch = writeBatch(firestore);
-      const transactionsQuery = query(
-        collection(firestore, `users/${user.uid}/transactions`),
-        where('groupId', '==', transaction.groupId),
-      );
-      const querySnapshot = await getDocs(transactionsQuery);
-      querySnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-    } else {
-      const transactionRef = doc(firestore, `users/${user.uid}/transactions/${transaction.id}`);
-      deleteDocumentNonBlocking(transactionRef);
-    }
+    try {
+      if (transaction.groupId) {
+        const batch = writeBatch(firestore);
+        const transactionsQuery = query(
+          collection(firestore, `users/${user.uid}/transactions`),
+          where('groupId', '==', transaction.groupId),
+        );
+        const querySnapshot = await getDocs(transactionsQuery);
+        querySnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+      } else {
+        const transactionRef = doc(firestore, `users/${user.uid}/transactions/${transaction.id}`);
+        deleteDocumentNonBlocking(transactionRef);
+      }
 
-    setIsDeleteDialogOpen(false);
+      toast({
+        variant: 'success',
+        title: t('transactions.messages.delete.success.title'),
+        description: t('transactions.messages.delete.success.description'),
+      });
+    } catch (_error) {
+      toast({
+        variant: 'destructive',
+        title: t('transactions.messages.delete.error.title'),
+        description: t('transactions.messages.delete.error.description'),
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   const isInstallment = transaction.installments && transaction.installments > 1;

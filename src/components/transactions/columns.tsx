@@ -1,7 +1,6 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import type { TFunction } from 'i18next';
 
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,7 +16,7 @@ type FormattingFunctions = {
 
 export const columns = (
   onEdit: (transaction: Transaction) => void,
-  t: TFunction,
+  t: (key: string) => string,
   { formatCurrency, formatDate }: FormattingFunctions,
 ): ColumnDef<Transaction>[] => {
   return [

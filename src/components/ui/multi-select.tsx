@@ -14,7 +14,7 @@ type Option = Record<'value' | 'label', string>;
 interface MultiSelectProps {
   options: Option[];
   selected: string[];
-  onChange: React.Dispatch<React.SetStateAction<string[]>>;
+  onChange: ((value: string[]) => void) | React.Dispatch<React.SetStateAction<string[]>>;
   placeholder?: string;
   className?: string;
 }
@@ -33,7 +33,10 @@ export function MultiSelect({
 
   const handleUnselect = React.useCallback(
     (value: string) => {
-      onChange(selected.filter((s) => s !== value));
+      const newSelected = selected.filter((s) => s !== value);
+      if (typeof onChange === 'function') {
+        onChange(newSelected);
+      }
     },
     [onChange, selected],
   );
@@ -101,9 +104,9 @@ export function MultiSelect({
           />
         </div>
       </div>
-      <div className="relative mt-2">
+      <div className="relative mt-2 min-h-0">
         {open && selectables.length > 0 ? (
-          <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+          <div className="absolute top-0 z-50 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
             <CommandGroup className="h-full overflow-auto">
               {selectables.map((option) => {
                 return (
@@ -115,7 +118,8 @@ export function MultiSelect({
                     }}
                     onSelect={() => {
                       setInputValue('');
-                      onChange((prev) => [...prev, option.value]);
+                      const newSelected = [...selected, option.value];
+                      onChange(newSelected);
                     }}
                     className={'cursor-pointer'}
                   >
